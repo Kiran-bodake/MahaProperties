@@ -1,0 +1,14 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+@use "@/styles/breakpoints" as *;
+
+.grid {
+  display: grid; grid-template-columns: 1fr; gap: $space-4;
+  @include bp(sm)  { grid-template-columns: repeat(2, 1fr); }
+  @include bp(lg)  { grid-template-columns: repeat(3, 1fr); }
+  @include bp(2xl) { grid-template-columns: repeat(4, 1fr); }
+}
+.empty      { grid-column: 1 / -1; text-align: center; padding: $space-24 $space-8; }
+.emptyIcon  { font-size: 3rem; margin-bottom: $space-4; }
+.emptyTitle { font-size: $font-size-2xl; font-weight: $font-weight-black; color: $gray-900; margin-bottom: $space-2; }
+.emptyText  { color: $gray-500; }

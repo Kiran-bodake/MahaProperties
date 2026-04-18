@@ -1,0 +1,45 @@
+:root {
+  --admin-bg: #f8fafc;
+  --admin-surface: #ffffff;
+  --admin-border: #e2e8f0;
+  --admin-text: #0f172a;
+  --admin-muted: #64748b;
+  --admin-link: #0ea5e9;
+  --admin-shadow: 0 5px 16px rgba(15, 23, 42, 0.08);
+}
+
+.xAdminRoot {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 42%, #e2e8f0 100%);
+  color: var(--admin-text);
+  font-family: var(--font-dm, "DM Sans", sans-serif);
+}
+
+.xAdminRoot *,
+.xAdminRoot *::before,
+.xAdminRoot *::after {
+  box-sizing: border-box;
+}
+
+.xAdminRoot a {
+  color: var(--admin-link);
+  text-decoration: none;
+}
+
+.xAdminRoot a:hover {
+  text-decoration: underline;
+}
+
+.xAdminRoot input,
+.xAdminRoot select,
+.xAdminRoot textarea {
+  color: var(--admin-text);
+  background: #ffffff;
+  border: 1px solid var(--admin-border);
+}
+
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-shadow);
+}

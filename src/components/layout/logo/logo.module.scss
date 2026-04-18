@@ -1,0 +1,39 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.wrapper {
+  display: inline-flex; align-items: center; gap: $space-2;
+  text-decoration: none; transition: $transition-base;
+  &:hover .iconBack  { transform: rotate(14deg); }
+  &:hover .iconFront { transform: rotate(-6deg); }
+}
+.iconWrap { position: relative; flex-shrink: 0; }
+.iconBack, .iconFront {
+  position: absolute; inset: 0; border-radius: $radius-lg;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.iconBack  { background: $brand-400; transform: rotate(6deg);  }
+.iconFront { background: $brand-600; transform: rotate(-2deg); }
+.iconLetter {
+  position: relative; z-index: 1; display: flex;
+  align-items: center; justify-content: center;
+  color: white; font-family: $font-display; font-weight: $font-weight-black;
+}
+.textWrap { display: flex; flex-direction: column; line-height: 1; gap: 0.1rem; }
+.name     { font-family: $font-display; font-weight: $font-weight-black; color: $gray-900; letter-spacing: -0.02em; }
+.accent   { color: $brand-600; }
+.sub      { color: $gray-400; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.sm .iconWrap { width: 1.75rem; height: 1.75rem; }
+.sm .iconLetter { font-size: 0.875rem; }
+.sm .name { font-size: 1rem; }
+.md .iconWrap { width: 2.25rem; height: 2.25rem; }
+.md .iconLetter { font-size: 1.125rem; }
+.md .name { font-size: 1.25rem; }
+.lg .iconWrap { width: 2.75rem; height: 2.75rem; }
+.lg .iconLetter { font-size: 1.375rem; }
+.lg .name { font-size: 1.5rem; }
+
+.light .name { color: white; }
+.light .accent { color: $brand-300; }
+.light .sub { color: rgba(255,255,255,0.4); }

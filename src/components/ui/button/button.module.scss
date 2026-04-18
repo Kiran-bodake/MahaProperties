@@ -1,0 +1,41 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.base { @include btn-base; }
+
+.primary {
+  background: $brand-600; color: $white;
+  box-shadow: 0 4px 14px rgba(22, 122, 88, 0.3);
+  &:hover:not(:disabled) { background: $brand-700; transform: translateY(-1px); }
+}
+.secondary {
+  background: $white; color: $brand-700; border: 2px solid $brand-200;
+  &:hover:not(:disabled) { border-color: $brand-400; background: $brand-50; }
+}
+.ghost {
+  background: transparent; color: $gray-600;
+  &:hover:not(:disabled) { background: $gray-100; color: $gray-900; }
+}
+.danger {
+  background: #dc2626; color: $white;
+  &:hover:not(:disabled) { background: #b91c1c; }
+}
+.gold {
+  background: $gold-500; color: $gray-900; font-weight: $font-weight-bold;
+  &:hover:not(:disabled) { background: $gold-400; }
+}
+.outline {
+  background: transparent; color: $brand-600; border: 2px solid $brand-600;
+  &:hover:not(:disabled) { background: $brand-50; }
+}
+
+.sm   { height: 2rem;   padding: 0 $space-3; font-size: $font-size-xs; }
+.md   { height: 2.5rem; padding: 0 $space-5; font-size: $font-size-sm; }
+.lg   { height: 3rem;   padding: 0 $space-7; font-size: $font-size-md; }
+.icon { height: 2.5rem; width: 2.5rem; padding: 0; }
+
+.spinner {
+  width: 1rem; height: 1rem; border: 2px solid currentColor;
+  border-top-color: transparent; border-radius: 50%;
+  animation: spin 0.8s linear infinite; flex-shrink: 0;
+}

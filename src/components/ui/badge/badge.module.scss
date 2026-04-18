@@ -1,0 +1,18 @@
+@use "@/styles/variables" as *;
+
+.base {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.2rem 0.6rem; border-radius: 0.5rem;
+  font-size: 0.7rem; font-weight: 600; white-space: nowrap;
+}
+.iconSlot { display: flex; align-items: center; }
+.iconSlot svg { width: 0.75rem; height: 0.75rem; }
+
+.default        { background: $gray-100;            color: $gray-700; }
+.rera           { background: rgba(16,185,129,0.12); color: #065f46;  }
+.featured       { background: rgba(245,200,66,0.18); color: #854d0e;  }
+.new            { background: rgba(37,99,235,0.1);   color: #1e40af;  }
+.sold           { background: rgba(220,38,38,0.1);   color: #991b1b;  }
+.success        { background: #d6f1e4;               color: #114e3a;  }
+.warning        { background: rgba(217,119,6,0.1);   color: #92400e;  }
+.zero_brokerage { background: rgba(124,58,237,0.1);  color: #5b21b6;  }

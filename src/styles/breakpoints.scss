@@ -1,0 +1,22 @@
+$bp-xs:  375px;
+$bp-sm:  640px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;
+$bp-2xl: 1536px;
+
+@mixin bp($size) {
+  @if $size == xs  { @media (min-width: $bp-xs)  { @content; } }
+  @if $size == sm  { @media (min-width: $bp-sm)  { @content; } }
+  @if $size == md  { @media (min-width: $bp-md)  { @content; } }
+  @if $size == lg  { @media (min-width: $bp-lg)  { @content; } }
+  @if $size == xl  { @media (min-width: $bp-xl)  { @content; } }
+  @if $size == 2xl { @media (min-width: $bp-2xl) { @content; } }
+}
+
+@mixin bp-max($size) {
+  @if $size == sm  { @media (max-width: calc(#{$bp-sm}  - 1px)) { @content; } }
+  @if $size == md  { @media (max-width: calc(#{$bp-md}  - 1px)) { @content; } }
+  @if $size == lg  { @media (max-width: calc(#{$bp-lg}  - 1px)) { @content; } }
+  @if $size == xl  { @media (max-width: calc(#{$bp-xl}  - 1px)) { @content; } }
+}

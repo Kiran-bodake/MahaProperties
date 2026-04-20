@@ -88,7 +88,6 @@ export default async function PropertiesPage({
               marginBottom: "10px",
             }}
           >
-            MahaProperties Search
           </div>
 
           <h1

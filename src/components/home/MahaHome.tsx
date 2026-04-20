@@ -776,7 +776,16 @@ function WhyNashik() {
 ═══════════════════════════════════════════════════════════ */
 function Testi() {
   const [ac, setAc] = useState(0);
-  const [ref, vis]  = useInView();
+  const [ref, vis] = useInView();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAc((prev) => (prev + 1) % TESTI.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const T = TESTI[ac];
 
   return (

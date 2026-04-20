@@ -449,7 +449,7 @@ export function Navbar() {
                 color:"white", fontSize:"13px", fontWeight:700,
                 boxShadow:"0 3px 10px rgba(22,163,74,0.32)", flexShrink:0,
               }}>
-                <Bell size={14} /> Enquiry Now
+                {/* <Bell size={14} />*/} Enquiry Now 
               </Link>
 
               {/* Burger */}

@@ -3,16 +3,138 @@ import { useState,useEffect} from "react";
 import Link from "next/link";
 import { Heart, MapPin, Ruler, Eye, CheckCircle, Phone } from "lucide-react";
 
+// const PROPS = [
+//   { id:"1", title:"Prime NA Plot — Gangapur Road",      locality:"Gangapur Road",  category:"NA Plot",          price:"₹42 L",    area:"2000 sqft", views:234, rera:true,  img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80", badge:"Featured"  },
+//   { id:"2", title:"Agriculture Land — Trimbak Road",    locality:"Trimbak Road",   category:"Agriculture Land", price:"₹85 L",    area:"3 Acre",    views:189, rera:true,  img:"https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&q=80", badge:"Hot Deal"  },
+//   { id:"3", title:"Industrial Shed — MIDC Satpur",      locality:"Satpur MIDC",    category:"Industrial Shed",  price:"₹1.2 Cr",  area:"5000 sqft", views:312, rera:false, img:"https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80", badge:"New"       },
+//   { id:"4", title:"Commercial Plot — Nashik Road",      locality:"Nashik Road",    category:"Commercial",       price:"₹68 L",    area:"1800 sqft", views:156, rera:true,  img:"https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80", badge:null        },
+//   { id:"5", title:"Investment Plot — Meri Village",     locality:"Meri",           category:"Investment Plot",  price:"₹18 L",    area:"1200 sqft", views:445, rera:true,  img:"https://images.unsplash.com/photo-1416331108676-a22ccb276e35?w=600&q=80", badge:"Best Buy"  },
+//   { id:"6", title:"Warehouse Land — Ambad Industrial",  locality:"Ambad",          category:"Warehouse",        price:"₹2.4 Cr",  area:"12000 sqft",views:98,  rera:false, img:"https://images.unsplash.com/photo-1565891741441-64926e441838?w=600&q=80", badge:null        },
+// ];
 const PROPS = [
-  { id:"1", title:"Prime NA Plot — Gangapur Road",      locality:"Gangapur Road",  category:"NA Plot",          price:"₹42 L",    area:"2000 sqft", views:234, rera:true,  img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80", badge:"Featured"  },
-  { id:"2", title:"Agriculture Land — Trimbak Road",    locality:"Trimbak Road",   category:"Agriculture Land", price:"₹85 L",    area:"3 Acre",    views:189, rera:true,  img:"https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&q=80", badge:"Hot Deal"  },
-  { id:"3", title:"Industrial Shed — MIDC Satpur",      locality:"Satpur MIDC",    category:"Industrial Shed",  price:"₹1.2 Cr",  area:"5000 sqft", views:312, rera:false, img:"https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80", badge:"New"       },
-  { id:"4", title:"Commercial Plot — Nashik Road",      locality:"Nashik Road",    category:"Commercial",       price:"₹68 L",    area:"1800 sqft", views:156, rera:true,  img:"https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80", badge:null        },
-  { id:"5", title:"Investment Plot — Meri Village",     locality:"Meri",           category:"Investment Plot",  price:"₹18 L",    area:"1200 sqft", views:445, rera:true,  img:"https://images.unsplash.com/photo-1416331108676-a22ccb276e35?w=600&q=80", badge:"Best Buy"  },
-  { id:"6", title:"Warehouse Land — Ambad Industrial",  locality:"Ambad",          category:"Warehouse",        price:"₹2.4 Cr",  area:"12000 sqft",views:98,  rera:false, img:"https://images.unsplash.com/photo-1565891741441-64926e441838?w=600&q=80", badge:null        },
+  {
+    id:"1",
+    slug:"na-plot-gangapur-road",
+    title:"Prime NA Plot — Gangapur Road",
+    locality:"Gangapur Road",
+    category:"NA Plot",
+    price:"₹42 L",
+    area:"2000 sqft",
+    views:234,
+    rera:true,
+    img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
+    badge:"Featured"
+  },
+
+  {
+    id:"2",
+    slug:"agriculture-land-igatpuri",
+    title:"Agriculture Land — Igatpuri",
+    locality:"Igatpuri",
+    category:"Agriculture Land",
+    price:"₹85 L",
+    area:"3 Acre",
+    views:189,
+    rera:true,
+    img:"https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&q=80",
+    badge:"Hot Deal"
+  },
+
+  {
+    id:"3",
+    slug:"industrial-shed-midc-satpur",
+    title:"Industrial Shed — MIDC Satpur",
+    locality:"Satpur MIDC",
+    category:"Industrial Shed",
+    price:"₹1.2 Cr",
+    area:"5000 sqft",
+    views:312,
+    rera:false,
+    img:"https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80",
+    badge:"New"
+  },
+
+  {
+    id:"4",
+    slug:"commercial-plot-nashik-road",
+    title:"Commercial Plot — Nashik Road",
+    locality:"Nashik Road",
+    category:"Commercial",
+    price:"₹68 L",
+    area:"1800 sqft",
+    views:156,
+    rera:true,
+    img:"https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80",
+    badge:null
+  },
+
+  {
+    id:"5",
+    slug:"investment-plot-meri-village",
+    title:"Investment Plot — Meri Village",
+    locality:"Meri Village",
+    category:"Investment",
+    price:"₹35 L",
+    area:"1500 sqft",
+    views:145,
+    rera:true,
+    img:"https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&q=80",
+    badge:"Best Buy"
+  },
+
+  {
+    id:"6",
+    slug:"warehouse-land-ambad-midc",
+    title:"Warehouse Land — Ambad MIDC",
+    locality:"Ambad",
+    category:"Warehouse",
+    price:"₹1.8 Cr",
+    area:"12000 sqft",
+    views:98,
+    rera:false,
+    img:"https://images.unsplash.com/photo-1565891741441-64926e441838?w=600&q=80",
+    badge:null
+  },
+
+  {
+    id:"7",
+    slug:"collector-na-trimbak-road",
+    title:"Collector NA — Trimbak Road",
+    locality:"Trimbak Road",
+    category:"Collector NA",
+    price:"₹52 L",
+    area:"2400 sqft",
+    views:190,
+    rera:true,
+    img:"https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80",
+    badge:"Verified"
+  },
+
+  {
+    id:"8",
+    slug:"na-plot-pathardi-phata",
+    title:"NA Plot — Pathardi Phata",
+    locality:"Pathardi Phata",
+    category:"NA Plot",
+    price:"₹39 L",
+    area:"1800 sqft",
+    views:210,
+    rera:true,
+    img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80",
+    badge:null
+  }
 ];
 
-const TABS = ["All","NA Plot","Agriculture Land","Commercial","Warehouse","Investment Plot"];
+// const TABS = ["All","NA Plot","Agriculture Land","Commercial","Warehouse","Investment Plot"];
+const TABS = [
+  "All",
+  "NA Plot",
+  "Agriculture Land",
+  "Commercial",
+  "Industrial Shed",
+  "Warehouse",
+  "Investment Plot"
+];
 
 export function FeaturedListings() {
   const [tab,   setTab]   = useState("All");
@@ -26,7 +148,7 @@ useEffect(() => {
     setLoading(true);
 
     const res = await fetch(
-      `/api/mock-properties?category=${encodeURIComponent(tab)}`
+      `/api/properties?category=${encodeURIComponent(tab)}`
     );
 
     const data = await res.json();
@@ -153,14 +275,31 @@ useEffect(() => {
                   </div>
 
                   <div style={{ display:"flex", gap:"8px" }}>
-                    <Link href={`/properties/${p.id}`} style={{
-                      flex:1, padding:"9px", borderRadius:"10px", textAlign:"center",
-                      border:"1.5px solid #e5e7eb", color:"#374151", fontWeight:600, fontSize:"0.83rem",
-                      transition:"all 0.2s",
-                    }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor="#16a34a"; (e.currentTarget as HTMLElement).style.color="#16a34a"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor="#e5e7eb"; (e.currentTarget as HTMLElement).style.color="#374151"; }}
-                    >View Details</Link>
+                    {/* <Link href={`/properties/${p.id}`} style={{ */}
+                    <Link
+  href={`/properties/${encodeURIComponent(String(p.slug).trim())}`}
+  style={{
+    flex: 1,
+    padding: "9px",
+    borderRadius: "10px",
+    textAlign: "center",
+    border: "1.5px solid #e5e7eb",
+    color: "#374151",
+    fontWeight: 600,
+    fontSize: "0.83rem",
+    transition: "all 0.2s",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.borderColor = "#16a34a";
+    e.currentTarget.style.color = "#16a34a";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.borderColor = "#e5e7eb";
+    e.currentTarget.style.color = "#374151";
+  }}
+>
+  View Details
+</Link>
                     <button style={{
                       flex:1, padding:"9px", borderRadius:"10px", textAlign:"center",
                       background:"linear-gradient(135deg,#16a34a,#22c55e)",

@@ -468,8 +468,23 @@ function CatGrid() {
           <Link href="/properties" className="b bo" style={{ padding:"8px 16px", fontSize:"12.5px" }}>All Properties {I.arr}</Link>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"12px" }}>
-          {CATS.map((c,i)=>(
-            <a key={c.l} href="#" className={`zm lf ${v?"fu":""}`} style={{ borderRadius:"12px", overflow:"hidden", position:"relative", display:"block", height:"152px", animationDelay:`${i*.065}s`, boxShadow:"0 2px 8px rgba(0,0,0,.06)", border:`1px solid ${G.li}`, flexShrink:0 }}>
+ {CATS.map((c,i)=>(
+  <Link
+    key={c.l}
+    href={`/properties?category=${encodeURIComponent(c.l)}`}
+    className={`zm lf ${v ? "fu" : ""}`}
+    style={{
+      borderRadius:"12px",
+      overflow:"hidden",
+      position:"relative",
+      display:"block",
+      height:"152px",
+      animationDelay:`${i*.065}s`,
+      boxShadow:"0 2px 8px rgba(0,0,0,.06)",
+      border:`1px solid ${G.li}`,
+      flexShrink:0
+    }}
+  >
               <div style={{ position:"absolute", inset:0 }}>
                 <Image src={c.img} alt={c.l} fill style={{ objectFit:"cover" }} />
               </div>
@@ -479,7 +494,7 @@ function CatGrid() {
                 <div style={{ fontWeight:800, fontSize:"12.5px", color:"white", lineHeight:1.2, marginBottom:"2px" }}>{c.l}</div>
                 <div style={{ fontSize:"10.5px", color:"rgba(255,255,255,.72)", fontWeight:600 }}>{c.c} listings</div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

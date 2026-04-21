@@ -47,6 +47,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(filtered);
 
+
   } catch (error) {
     console.error(error);
     return NextResponse.json(

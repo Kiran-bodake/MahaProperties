@@ -88,6 +88,7 @@ export default async function PropertiesPage({
               marginBottom: "10px",
             }}
           >
+            
           </div>
 
           <h1

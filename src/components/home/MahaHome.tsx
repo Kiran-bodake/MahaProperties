@@ -291,13 +291,13 @@ const TESTI = [
   { n:"Priya Kulkarni", r:"Investment Plots", lc:"Meri Village",  av:"P", col:"#c8973a", pImg:"https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=75", txt:"Invested in two plots. Already 35% appreciation in 18 months. Their knowledge of Nashik&apos;s micro-markets is unmatched." },
 ];
 
-const BLOGS = [
-  { s:"na-plot-guide",      t:"Complete Guide to Buying NA Plots in Nashik 2025",    cat:"Buying Guide", d:"Jan 15", r:"8 min", img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=75", feat:true  },
-  { s:"agriculture-invest", t:"Why Nashik Agriculture Land Is Maharashtra's Best Bet",cat:"Investment",   d:"Jan 22", r:"6 min", img:"https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500&q=75", feat:false },
-  { s:"midc-industrial",    t:"MIDC Nashik: Industrial Opportunities 2025",           cat:"Commercial",   d:"Feb 1",  r:"7 min", img:"https://images.unsplash.com/photo-1565891741441-64926e441838?w=500&q=75", feat:false },
-  { s:"rera-guide",         t:"RERA for Property Buyers: Plain-English Guide",        cat:"Legal",        d:"Feb 10", r:"5 min", img:"https://images.unsplash.com/photo-1486325212027-8081e485255e?w=500&q=75", feat:false },
-  { s:"villa-plots-nashik", t:"Best Villa Plots in Nashik for Smart Investment 2025", cat:"Residential",  d:"Feb 18", r:"6 min", img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=75",    feat:false }
-];
+// const BLOGS = [
+//   { s:"na-plot-guide",      t:"Complete Guide to Buying NA Plots in Nashik 2025",    cat:"Buying Guide", d:"Jan 15", r:"8 min", img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=75", feat:true  },
+//   { s:"agriculture-invest", t:"Why Nashik Agriculture Land Is Maharashtra's Best Bet",cat:"Investment",   d:"Jan 22", r:"6 min", img:"https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500&q=75", feat:false },
+//   { s:"midc-industrial",    t:"MIDC Nashik: Industrial Opportunities 2025",           cat:"Commercial",   d:"Feb 1",  r:"7 min", img:"https://images.unsplash.com/photo-1565891741441-64926e441838?w=500&q=75", feat:false },
+//   { s:"rera-guide",         t:"RERA for Property Buyers: Plain-English Guide",        cat:"Legal",        d:"Feb 10", r:"5 min", img:"https://images.unsplash.com/photo-1486325212027-8081e485255e?w=500&q=75", feat:false },
+//   { s:"villa-plots-nashik", t:"Best Villa Plots in Nashik for Smart Investment 2025", cat:"Residential",  d:"Feb 18", r:"6 min", img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=500&q=75",    feat:false }
+// ];
 
 const TABS_P = ["All","NA Plot","Agriculture","Commercial","Warehouse","Investment","Collector NA"];
 const TYPES  = ["All Types","NA Plot","Collector NA","Agriculture","Warehouse","Commercial","Investment Plot"];
@@ -856,44 +856,189 @@ function Testi() {
 /* ═══════════════════════════════════════════════════════════
    BLOGS
 ═══════════════════════════════════════════════════════════ */
-function Blogs() {
+function Blogs({ blogs }: any) {
   const [ref, vis] = useInView();
-  const [main, ...rest] = BLOGS;
+
+  // dynamic blogs data
+
+  if (!blogs ||blogs.length === 0) return null;
+
+  const [main, ...rest] = blogs;
+
   return (
-    <section className="sec" style={{ background:"white", padding:"44px 0" }} ref={ref}>
+    <section
+      className="sec"
+      style={{ background: "white", padding: "44px 0" }}
+      ref={ref}
+    >
       <div className="w">
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginBottom:"22px", flexWrap:"wrap", gap:"10px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            marginBottom: "22px",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
           <div>
             <div className="sl">Insights</div>
-            <h2 style={{ fontFamily:FONT, fontSize:"clamp(1.4rem,2.8vw,2.1rem)", fontWeight:800, letterSpacing:"-0.03em", color:G.ink }}>Nashik Property Insights</h2>
+            <h2
+              style={{
+                fontFamily: FONT,
+                fontSize: "clamp(1.4rem,2.8vw,2.1rem)",
+                fontWeight: 800,
+                letterSpacing: "-0.03em",
+                color: G.ink,
+              }}
+            >
+              Nashik Property Insights
+            </h2>
           </div>
-          <Link href="/blog" className="b bo" style={{ padding:"8px 16px", fontSize:"12.5px" }}>All Articles {I.arr}</Link>
+
+          <Link
+            href="/blog"
+            className="b bo"
+            style={{ padding: "8px 16px", fontSize: "12.5px" }}
+          >
+            All Articles {I.arr}
+          </Link>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"1.4fr 1fr", gap:"16px" }}>
-          <Link href={`/blog/${main.s}`} className="lf zm" style={{ background:"white", borderRadius:"14px", overflow:"hidden", border:`1px solid ${G.li}`, display:"block", boxShadow:"0 2px 8px rgba(0,0,0,.05)", opacity:vis?1:0, transform:vis?"none":"translateY(14px)", transition:`opacity .5s ${E},transform .5s ${E},box-shadow .26s ${E},transform .26s ${E}` }}>
-            <div style={{ aspectRatio:"16/9", position:"relative", overflow:"hidden" }}>
-              <Image src={main.img} alt={main.t} fill style={{ objectFit:"cover" }} />
-              <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(0,0,0,.28) 0%,transparent 60%)" }}/>
-              <div style={{ position:"absolute", top:"12px", left:"12px", display:"flex", gap:"6px" }}>
-                <span style={{ ...CC[main.cat], padding:"3px 10px", borderRadius:"99px", fontSize:"10px", fontWeight:700 }}>{main.cat}</span>
-                <span style={{ background:"rgba(200,151,58,.9)", color:"white", padding:"3px 10px", borderRadius:"99px", fontSize:"10px", fontWeight:700 }}>Featured</span>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.4fr 1fr",
+            gap: "16px",
+          }}
+        >
+          {/* Main Blog */}
+          <Link
+            href={`/blog/${main.s}`}
+            className="lf zm"
+            style={{
+              background: "white",
+              borderRadius: "14px",
+              overflow: "hidden",
+              border: `1px solid ${G.li}`,
+              display: "block",
+            }}
+          >
+            <div
+              style={{
+                aspectRatio: "16/9",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src={main.img}
+                alt={main.t}
+                fill
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+
+            <div style={{ padding: "18px" }}>
+              <h3
+                style={{
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  color: G.ink,
+                  marginBottom: "7px",
+                }}
+              >
+                {main.t}
+              </h3>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "12px",
+                  fontSize: "11.5px",
+                  color: G.mu,
+                }}
+              >
+                <span>📅 {main.d}</span>
+                <span>⏱ {main.r} read</span>
               </div>
             </div>
-            <div style={{ padding:"18px" }}>
-              <h3 style={{ fontWeight:800, fontSize:"1rem", color:G.ink, marginBottom:"7px", lineHeight:1.3, letterSpacing:"-0.02em" }}>{main.t}</h3>
-              <div style={{ display:"flex", gap:"12px", fontSize:"11.5px", color:G.mu }}><span>📅 {main.d}</span><span>⏱ {main.r} read</span></div>
-            </div>
           </Link>
-          <div style={{ display:"flex", flexDirection:"column", gap:"11px" }}>
-            {rest.map((b,i)=>(
-              <Link key={b.s} href={`/blog/${b.s}`} className="lf" style={{ background:"white", borderRadius:"12px", overflow:"hidden", border:`1px solid ${G.li}`, display:"flex", boxShadow:"0 2px 6px rgba(0,0,0,.04)", opacity:vis?1:0, transform:vis?"none":"translateX(12px)", transition:`opacity .5s ${E} ${i*.09}s,transform .5s ${E} ${i*.09}s,box-shadow .26s ${E},transform .26s ${E}` }}>
-                <div className="zm" style={{ width:"96px", flexShrink:0, overflow:"hidden", position:"relative" }}>
-                  <Image src={b.img} alt={b.t} fill style={{ objectFit:"cover" }} />
+
+          {/* Side Blogs */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "11px",
+            }}
+          >
+            {rest.map((b: any, i: number) => (
+              <Link
+                key={b.s}
+                href={`/blog/${b.s}`}
+                className="lf"
+                style={{
+                  background: "white",
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  border: `1px solid ${G.li}`,
+                  display: "flex",
+                }}
+              >
+                <div
+                  style={{
+                    width: "96px",
+                    flexShrink: 0,
+                    position: "relative",
+                  }}
+                >
+                  <Image
+                    src={b.img}
+                    alt={b.t}
+                    fill
+                    style={{ objectFit: "cover" }}
+                  />
                 </div>
-                <div style={{ padding:"11px 13px", display:"flex", flexDirection:"column", justifyContent:"center" }}>
-                  <span style={{ ...CC[b.cat], display:"inline-flex", padding:"2px 9px", borderRadius:"99px", fontSize:"9px", fontWeight:700, marginBottom:"6px", width:"fit-content" }}>{b.cat}</span>
-                  <h3 style={{ fontWeight:700, fontSize:"12.5px", color:G.ink, lineHeight:1.32, marginBottom:"5px", letterSpacing:"-0.01em" }}>{b.t}</h3>
-                  <div style={{ display:"flex", gap:"9px", fontSize:"10.5px", color:G.mu }}><span>{b.d}</span><span>{b.r} read</span></div>
+
+                <div style={{ padding: "11px 13px" }}>
+                  <span
+                    style={{
+                      ...CC[b.cat],
+                      display: "inline-flex",
+                      padding: "2px 9px",
+                      borderRadius: "99px",
+                      fontSize: "9px",
+                      fontWeight: 700,
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {b.cat}
+                  </span>
+
+                  <h3
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "12.5px",
+                      color: G.ink,
+                      marginBottom: "5px",
+                    }}
+                  >
+                    {b.t}
+                  </h3>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "9px",
+                      fontSize: "10.5px",
+                      color: G.mu,
+                    }}
+                  >
+                    <span>{b.d}</span>
+                    <span>{b.r} read</span>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -903,7 +1048,6 @@ function Blogs() {
     </section>
   );
 }
-
 /* ═══════════════════════════════════════════════════════════
    CTA BANNER
 ═══════════════════════════════════════════════════════════ */
@@ -1007,6 +1151,14 @@ function WA() {
    ROOT EXPORT  — single component, zero duplicates
 ═══════════════════════════════════════════════════════════ */
 export default function MahaHome() {
+  const [blogs, setBlogs] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/blogs")
+      .then((res) => res.json())
+      .then((data) => setBlogs(data))
+      .catch((err) => console.error(err));
+  }, []);
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: GCSS }}/>
@@ -1020,7 +1172,7 @@ export default function MahaHome() {
         <Locs/>
         <WhyNashik/>
         <Testi/>
-        <Blogs/>
+       <Blogs blogs={blogs} />
         <CTA/>
       </main>
       {/* Single footer */}

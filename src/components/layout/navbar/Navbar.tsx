@@ -250,9 +250,9 @@ export function Navbar() {
         >
           <button style={{
             display:"flex", alignItems:"center", gap:"5px",
-            padding:"8px 13px", borderRadius:"9px",
+            padding:"8px 10px", borderRadius:"9px",
             fontFamily:"var(--font-dm,'DM Sans',sans-serif)",
-            fontSize:"14px", fontWeight:600,
+            fontSize:"14px", fontWeight:600,whiteSpace:"nowrap",
             color: activeMenu === item.label ? navHov : navTxt,
             background: activeMenu === item.label
               ? (onDark ? "rgba(255,255,255,0.12)" : "rgba(22,163,74,0.07)")
@@ -340,7 +340,19 @@ export function Navbar() {
         <div className="container" style={{ display:"flex", alignItems:"center", height: "100px", gap:"0", transition:"height 0.35s ease" }}>
 
           {/* ── LOGO ── */}
-          <Link href="/" style={{ display:"flex", alignItems:"center", gap:"10px", textDecoration:"none", flexShrink:0, marginRight:"28px" }}>
+          {/* <Link href="/" style={{ display:"flex", alignItems:"center", gap:"10px", textDecoration:"none", flexShrink:0, marginRight:"28px" }}> */}
+          <Link
+  href="/"
+  style={{
+    display:"flex",
+    alignItems:"center",
+    gap:"10px",
+    textDecoration:"none",
+    flexShrink:0,
+    marginRight:"18px",
+    marginLeft:"-8px"
+  }}
+>
             <div style={{
               width: "200px",
               height: "50px",

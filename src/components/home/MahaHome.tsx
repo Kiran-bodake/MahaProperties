@@ -1816,7 +1816,7 @@ function Featured({ properties }: any) {
             gap: "14px",
           }}
         >
-          {filtered.map((p: any, i: number) => (
+          {filtered.slice(0, 8).map((p: any, i: number) => (
             <PCard key={p.id || i} p={p} vis={vis} d={i * 0.05} />
           ))}
         </div>

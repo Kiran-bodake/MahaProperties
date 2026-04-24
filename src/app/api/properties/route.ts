@@ -47,7 +47,6 @@
 
 //     return NextResponse.json(filtered);
 
-
 //   } catch (error) {
 //     console.error(error);
 //     return NextResponse.json(
@@ -68,8 +67,7 @@ export async function GET(req: Request) {
       !category || category === "All"
         ? properties
         : properties.filter(
-            (item: any) =>
-              item.cat?.toLowerCase() === category.toLowerCase()
+            (item: any) => item.cat?.toLowerCase() === category.toLowerCase(),
           );
 
     return NextResponse.json(filtered);
@@ -78,7 +76,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(
       { error: "Failed to load properties" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

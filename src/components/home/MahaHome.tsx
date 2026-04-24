@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
-
+import properties from "@/moc-data/properties.json";
 /* ═══════════════════════════════════════════════════════════
    TOKENS
 ═══════════════════════════════════════════════════════════ */
@@ -424,44 +424,72 @@ const SLIDES = [
   },
 ];
 
-const CATS = [
-  {
-    e: "🏞️",
-    l: "NA Plots",
-    c: "480+",
-    img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500&q=80",
-  },
-  {
-    e: "📋",
-    l: "Collector NA",
-    c: "95+",
-    img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=80",
-  },
-  {
-    e: "🌾",
-    l: "Agriculture Land",
-    c: "120+",
-    img: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500&q=80",
-  },
-  {
-    e: "🏭",
-    l: "Warehouse",
-    c: "45+",
-    img: "https://images.unsplash.com/photo-1565891741441-64926e441838?w=500&q=80",
-  },
-  {
-    e: "🏢",
-    l: "Commercial",
-    c: "70+",
-    img: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=500&q=80",
-  },
-  {
-    e: "📈",
-    l: "Investment Plots",
-    c: "200+",
-    img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=500&q=80",
-  },
-];
+// const CATS = [
+//   {
+//     e: "🏞️",
+//     l: "NA Plots",
+//     c: "480+",
+//     img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500&q=80",
+//   },
+//   {
+//     e: "📋",
+//     l: "Collector NA",
+//     c: "95+",
+//     img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=80",
+//   },
+//   {
+//     e: "🌾",
+//     l: "Agriculture Land",
+//     c: "120+",
+//     img: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500&q=80",
+//   },
+//   {
+//     e: "🏭",
+//     l: "Warehouse",
+//     c: "45+",
+//     img: "https://images.unsplash.com/photo-1565891741441-64926e441838?w=500&q=80",
+//   },
+//   {
+//     e: "🏢",
+//     l: "Commercial",
+//     c: "70+",
+//     img: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=500&q=80",
+//   },
+//   {
+//     e: "📈",
+//     l: "Investment Plots",
+//     c: "200+",
+//     img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=500&q=80",
+//   },
+// ];
+
+const ICONS: any = {
+  "NA Plot": "🏞️",
+  "Agriculture Land": "🌾",
+  Warehouse: "🏭",
+  Commercial: "🏢",
+  "Investment Plot": "📈",
+  "Collector NA": "📋",
+};
+
+const categoryMap = new Map();
+
+properties.forEach((p) => {
+  if (!categoryMap.has(p.cat)) {
+    categoryMap.set(p.cat, {
+      l: p.cat,
+      c: 0,
+      img: p.img,
+      e: ICONS[p.cat] || "📍",
+    });
+  }
+  categoryMap.get(p.cat).c++;
+});
+
+const CATS = Array.from(categoryMap.values()).map((c) => ({
+  ...c,
+  c: `${c.c}+`,
+}));
 
 const PIMGS: Record<string, string[]> = {
   "1": [

@@ -1036,7 +1036,7 @@ function Hero() {
 
           {/* Search bar */}
           <div
-            key={`sb-${slide}`}
+            // key={`sb-${slide}`}
             className="fu d3"
             style={{
               background: "rgba(255,255,255,.97)",

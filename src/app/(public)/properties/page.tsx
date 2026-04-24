@@ -54,7 +54,7 @@ async function getProperties(params: {
     }/api/properties?${qs.toString()}`,
     {
       cache: "no-store",
-    }
+    },
   );
 
   return res.json();
@@ -81,9 +81,7 @@ export default function PropertiesPage() {
         sortBy,
       });
 
-      const result = Array.isArray(data)
-        ? data
-        : data.properties || [];
+      const result = Array.isArray(data) ? data : data.properties || [];
 
       setProperties(result);
     }
@@ -96,10 +94,7 @@ export default function PropertiesPage() {
       <MegaNavbar />
 
       {/* CONTACT POPUP */}
-      <ContactPopup
-        open={showPopup}
-        onClose={() => setShowPopup(false)}
-      />
+      <ContactPopup open={showPopup} onClose={() => setShowPopup(false)} />
 
       <main
         style={{
@@ -148,10 +143,9 @@ export default function PropertiesPage() {
                 fontSize: "15px",
               }}
             >
-              Explore verified NA plots, commercial properties,
-              industrial spaces, warehouses, and investment
-              opportunities with trusted pricing and premium
-              locations.
+              Explore verified NA plots, commercial properties, industrial
+              spaces, warehouses, and investment opportunities with trusted
+              pricing and premium locations.
             </p>
           </section>
 
@@ -198,11 +192,7 @@ export default function PropertiesPage() {
                   style={input}
                 />
 
-                <select
-                  name="category"
-                  defaultValue={category}
-                  style={input}
-                >
+                <select name="category" defaultValue={category} style={input}>
                   <option value="">All Categories</option>
                   <option>NA Plot</option>
                   <option>Agriculture Land</option>
@@ -220,24 +210,14 @@ export default function PropertiesPage() {
                   style={input}
                 />
 
-                <select
-                  name="sortBy"
-                  defaultValue={sortBy}
-                  style={input}
-                >
+                <select name="sortBy" defaultValue={sortBy} style={input}>
                   <option value="newest">Newest First</option>
 
-                  <option value="price_asc">
-                    Price Low → High
-                  </option>
+                  <option value="price_asc">Price Low → High</option>
 
-                  <option value="price_desc">
-                    Price High → Low
-                  </option>
+                  <option value="price_desc">Price High → Low</option>
 
-                  <option value="popular">
-                    Most Popular
-                  </option>
+                  <option value="popular">Most Popular</option>
                 </select>
 
                 <button
@@ -248,8 +228,7 @@ export default function PropertiesPage() {
                     borderRadius: "16px",
                     border: "none",
                     cursor: "pointer",
-                    background:
-                      "linear-gradient(135deg,#16a34a,#22c55e)",
+                    background: "linear-gradient(135deg,#16a34a,#22c55e)",
                     color: "#fff",
                     fontWeight: 800,
                     fontSize: "15px",
@@ -326,9 +305,7 @@ export default function PropertiesPage() {
               >
                 {properties.map((p) => {
                   const images =
-                    p.images && p.images.length > 0
-                      ? p.images
-                      : [p.img];
+                    p.images && p.images.length > 0 ? p.images : [p.img];
 
                   return (
                     <Link
@@ -346,8 +323,7 @@ export default function PropertiesPage() {
                           borderRadius: "26px",
                           overflow: "hidden",
                           border: "1px solid #e5e7eb",
-                          boxShadow:
-                            "0 12px 40px rgba(15,23,42,.06)",
+                          boxShadow: "0 12px 40px rgba(15,23,42,.06)",
                         }}
                       >
                         {/* IMAGE */}
@@ -355,16 +331,12 @@ export default function PropertiesPage() {
                         <div
                           style={{
                             position: "relative",
-                            minHeight: "280px",
+                            minHeight: "180px",
                             overflow: "hidden",
                           }}
                         >
                           <PropertyImageSlider
-                            title={
-                              p.title ||
-                              p.t ||
-                              "Property Image"
-                            }
+                            title={p.title || p.t || "Property Image"}
                             images={
                               p.images?.length
                                 ? p.images
@@ -414,13 +386,12 @@ export default function PropertiesPage() {
 
                           {/* PHOTO COUNT */}
 
-                          <div
+                          {/* <div
                             style={{
                               position: "absolute",
-                              bottom: "16px",
+                              bottom: "36px",
                               right: "16px",
-                              background:
-                                "rgba(0,0,0,.75)",
+                              background: "rgba(0,0,0,.75)",
                               color: "#fff",
                               padding: "8px 14px",
                               borderRadius: "999px",
@@ -430,14 +401,14 @@ export default function PropertiesPage() {
                             }}
                           >
                             📸 {images.length} Photos
-                          </div>
+                          </div> */}
                         </div>
 
                         {/* CONTENT */}
 
                         <div
                           style={{
-                            padding: "28px",
+                            padding: "18px",
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "space-between",
@@ -464,7 +435,7 @@ export default function PropertiesPage() {
                             <h2
                               style={{
                                 margin: 0,
-                                fontSize: "1.7rem",
+                                fontSize: "1.3rem",
                                 fontWeight: 900,
                                 color: "#111827",
                                 lineHeight: 1.3,
@@ -488,12 +459,10 @@ export default function PropertiesPage() {
                                 display: "flex",
                                 flexWrap: "wrap",
                                 gap: "12px",
-                                marginTop: "22px",
+                                marginTop: "14px",
                               }}
                             >
-                              <div style={featureBox}>
-                                📐 {p.area}
-                              </div>
+                              <div style={featureBox}>📐 {p.area}</div>
 
                               <div style={featureBox}>
                                 👁 {p.views || 0} views
@@ -503,8 +472,7 @@ export default function PropertiesPage() {
                                 <div
                                   style={{
                                     ...featureBox,
-                                    background:
-                                      "#fee2e2",
+                                    background: "#fee2e2",
                                     color: "#b91c1c",
                                     fontWeight: 700,
                                   }}
@@ -519,10 +487,9 @@ export default function PropertiesPage() {
 
                           <div
                             style={{
-                              marginTop: "30px",
+                              marginTop: "18px",
                               display: "flex",
-                              justifyContent:
-                                "space-between",
+                              justifyContent: "space-between",
                               alignItems: "center",
                               flexWrap: "wrap",
                               gap: "18px",
@@ -531,7 +498,7 @@ export default function PropertiesPage() {
                             <div>
                               <div
                                 style={{
-                                  fontSize: "2.1rem",
+                                  fontSize: "1.6rem",
                                   fontWeight: 900,
                                   color: "#166534",
                                 }}
@@ -568,11 +535,7 @@ export default function PropertiesPage() {
                                 Contact
                               </button>
 
-                              <button
-                                style={primaryBtn}
-                              >
-                                View Details
-                              </button>
+                              <button style={primaryBtn}>View Details</button>
                             </div>
                           </div>
                         </div>

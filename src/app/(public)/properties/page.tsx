@@ -1,187 +1,206 @@
-// src/app/properties/page.tsx
-import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
+// src/app/(public)/properties/page.tsx
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-// type Property = {
-//   id?: string;
-//   _id?: string;
-//   slug: string;
-//   title: string;
-//   locality: string;
-//   price: string | number;
-//   area: string;
-//   category: string;
-//   img: string;
-//   views?: number;
-//   rera?: boolean;
-//   badge?: string | null;
-// };
-
-type SearchParams = {
-  category?: string;
-  locality?: string;
-  q?: string;
-  sortBy?: string;
-};
-
+import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
+import PropertyImageSlider from "@/components/property/PropertyImageSlider";
+import ContactPopup from "@/components/property/ContactPopup";
 type Property = {
   id?: string;
   _id?: string;
   slug: string;
 
-  // New schema
   title?: string;
   locality?: string;
   price?: string | number;
   category?: string;
 
-  // Old schema (temporary support)
   t?: string;
   loc?: string;
   pr?: string | number;
   cat?: string;
 
   area: string;
+
   img: string;
+  images?: string[];
+
   views?: number;
   rera?: boolean;
   badge?: string | null;
 };
 
-async function getProperties(searchParams: SearchParams) {
+async function getProperties(params: {
+  q?: string;
+  category?: string;
+  locality?: string;
+  sortBy?: string;
+}) {
   const qs = new URLSearchParams();
 
-  Object.entries(searchParams).forEach(([key, value]) => {
-    if (value) qs.append(key, value);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) {
+      qs.append(key, value);
+    }
   });
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/properties?${qs.toString()}`,
-    { cache: "no-store" },
+    `${
+      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    }/api/properties?${qs.toString()}`,
+    {
+      cache: "no-store",
+    }
   );
 
   return res.json();
 }
 
-export default async function PropertiesPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const data = await getProperties(searchParams);
+export default function PropertiesPage() {
+  const searchParams = useSearchParams();
 
-  const properties: Property[] = Array.isArray(data)
-    ? data
-    : data.properties || [];
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [showPopup, setShowPopup] = useState(false);
+
+  // FIXED SEARCH PARAMS ERROR
+  const q = searchParams.get("q") || "";
+  const category = searchParams.get("category") || "";
+  const locality = searchParams.get("locality") || "";
+  const sortBy = searchParams.get("sortBy") || "newest";
+
+  useEffect(() => {
+    async function loadData() {
+      const data = await getProperties({
+        q,
+        category,
+        locality,
+        sortBy,
+      });
+
+      const result = Array.isArray(data)
+        ? data
+        : data.properties || [];
+
+      setProperties(result);
+    }
+
+    loadData();
+  }, [q, category, locality, sortBy]);
 
   return (
     <>
       <MegaNavbar />
+
+      {/* CONTACT POPUP */}
+      <ContactPopup
+        open={showPopup}
+        onClose={() => setShowPopup(false)}
+      />
+
       <main
         style={{
-          background: "linear-gradient(to bottom,#f8fafc,#ffffff)",
+          background: "#f8fafc",
           minHeight: "100vh",
-          padding: "96px 0 60px",
+          padding: "100px 0 60px",
         }}
       >
         <div
           style={{
-            width: "min(1320px,94%)",
+            width: "min(1450px,95%)",
             margin: "0 auto",
           }}
         >
-          {/* HERO BAR */}
+          {/* HERO SECTION */}
+
           <section
             style={{
-              background: "linear-gradient(135deg,#052e16,#166534,#16a34a)",
-              borderRadius: "24px",
-              padding: "28px",
-              color: "white",
-              marginBottom: "24px",
-              boxShadow: "0 25px 60px rgba(22,163,74,.18)",
+              background:
+                "linear-gradient(135deg,#052e16 0%, #166534 50%, #22c55e 100%)",
+              borderRadius: "28px",
+              padding: "42px",
+              color: "#fff",
+              marginBottom: "28px",
+              boxShadow: "0 25px 70px rgba(22,163,74,.25)",
             }}
           >
-            <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                letterSpacing: ".08em",
-                textTransform: "uppercase",
-                opacity: 0.9,
-                marginBottom: "10px",
-              }}
-            ></div>
-
             <h1
               style={{
                 margin: 0,
-                fontSize: "clamp(1.8rem,4vw,3rem)",
+                fontSize: "clamp(2rem,5vw,3.5rem)",
                 fontWeight: 900,
                 lineHeight: 1.05,
-                maxWidth: "700px",
-                color: "#ffffff",
+                maxWidth: "800px",
               }}
             >
-              Find Verified Properties in Nashik
+              Discover Premium Properties in Nashik
             </h1>
 
             <p
               style={{
-                marginTop: "10px",
-                maxWidth: "620px",
-                color: "rgba(255,255,255,.86)",
-                lineHeight: 1.6,
+                marginTop: "16px",
+                maxWidth: "760px",
+                lineHeight: 1.7,
+                color: "rgba(255,255,255,.9)",
+                fontSize: "15px",
               }}
             >
-              Search NA plots, agriculture land, commercial, warehouse &
-              investment properties with transparent pricing.
+              Explore verified NA plots, commercial properties,
+              industrial spaces, warehouses, and investment
+              opportunities with trusted pricing and premium
+              locations.
             </p>
           </section>
 
-          {/* LAYOUT */}
+          {/* MAIN LAYOUT */}
+
           <section
             style={{
               display: "grid",
-              gridTemplateColumns: "300px 1fr",
-              gap: "22px",
+              gridTemplateColumns: "320px 1fr",
+              gap: "24px",
+              alignItems: "start",
             }}
           >
             {/* SIDEBAR */}
+
             <aside
               style={{
-                background: "white",
-                borderRadius: "20px",
+                background: "#fff",
+                borderRadius: "24px",
+                padding: "22px",
                 border: "1px solid #e5e7eb",
-                padding: "18px",
-                height: "fit-content",
                 position: "sticky",
-                top: "20px",
-                boxShadow: "0 10px 25px rgba(15,23,42,.04)",
+                top: "100px",
+                boxShadow: "0 10px 30px rgba(15,23,42,.05)",
               }}
             >
               <div
                 style={{
+                  fontSize: "1.2rem",
                   fontWeight: 800,
-                  fontSize: "1.05rem",
+                  marginBottom: "20px",
                   color: "#111827",
-                  marginBottom: "16px",
                 }}
               >
-                Filter Search
+                Filter Properties
               </div>
 
               <form method="GET">
                 <input
                   type="text"
                   name="q"
-                  defaultValue={searchParams.q || ""}
-                  placeholder="Search keywords..."
+                  defaultValue={q}
+                  placeholder="Search properties..."
                   style={input}
                 />
 
                 <select
                   name="category"
-                  defaultValue={searchParams.category || ""}
+                  defaultValue={category}
                   style={input}
                 >
                   <option value="">All Categories</option>
@@ -196,34 +215,45 @@ export default async function PropertiesPage({
                 <input
                   type="text"
                   name="locality"
-                  defaultValue={searchParams.locality || ""}
+                  defaultValue={locality}
                   placeholder="Enter locality"
                   style={input}
                 />
 
                 <select
                   name="sortBy"
-                  defaultValue={searchParams.sortBy || "newest"}
+                  defaultValue={sortBy}
                   style={input}
                 >
                   <option value="newest">Newest First</option>
-                  <option value="price_asc">Price Low → High</option>
-                  <option value="price_desc">Price High → Low</option>
-                  <option value="popular">Popular</option>
+
+                  <option value="price_asc">
+                    Price Low → High
+                  </option>
+
+                  <option value="price_desc">
+                    Price High → Low
+                  </option>
+
+                  <option value="popular">
+                    Most Popular
+                  </option>
                 </select>
 
                 <button
                   type="submit"
                   style={{
                     width: "100%",
-                    height: "46px",
+                    height: "50px",
+                    borderRadius: "16px",
                     border: "none",
-                    borderRadius: "14px",
                     cursor: "pointer",
-                    background: "linear-gradient(135deg,#16a34a,#22c55e)",
-                    color: "white",
+                    background:
+                      "linear-gradient(135deg,#16a34a,#22c55e)",
+                    color: "#fff",
                     fontWeight: 800,
-                    marginTop: "4px",
+                    fontSize: "15px",
+                    marginTop: "6px",
                   }}
                 >
                   Apply Filters
@@ -231,20 +261,23 @@ export default async function PropertiesPage({
               </form>
             </aside>
 
-            {/* RESULTS */}
+            {/* RIGHT SIDE */}
+
             <div>
-              {/* TOP BAR */}
+              {/* TOPBAR */}
+
               <div
                 style={{
-                  background: "white",
-                  borderRadius: "18px",
+                  background: "#fff",
+                  borderRadius: "22px",
+                  padding: "18px 24px",
                   border: "1px solid #e5e7eb",
-                  padding: "16px 18px",
-                  marginBottom: "18px",
+                  marginBottom: "22px",
                   display: "flex",
                   justifyContent: "space-between",
-                  gap: "10px",
+                  alignItems: "center",
                   flexWrap: "wrap",
+                  gap: "10px",
                 }}
               >
                 <div>
@@ -257,18 +290,18 @@ export default async function PropertiesPage({
                       letterSpacing: ".08em",
                     }}
                   >
-                    Results
+                    Property Results
                   </div>
 
                   <div
                     style={{
-                      marginTop: "4px",
-                      fontSize: "1.1rem",
-                      fontWeight: 800,
+                      marginTop: "6px",
+                      fontSize: "1.25rem",
+                      fontWeight: 900,
                       color: "#111827",
                     }}
                   >
-                    {properties.length} Properties Found
+                    {properties.length} Properties Available
                   </div>
                 </div>
 
@@ -282,160 +315,285 @@ export default async function PropertiesPage({
                 </div>
               </div>
 
-              {/* GRID */}
+              {/* PROPERTY LIST */}
+
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit,minmax(290px,1fr))",
-                  gap: "18px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "22px",
                 }}
               >
-                {properties.map((p) => (
-                  <Link
-                    key={p.id || p._id}
-                    href={`/properties/${p.slug}`}
-                    style={{
-                      textDecoration: "none",
-                    }}
-                  >
-                    <article
+                {properties.map((p) => {
+                  const images =
+                    p.images && p.images.length > 0
+                      ? p.images
+                      : [p.img];
+
+                  return (
+                    <Link
+                      key={p.id || p._id}
+                      href={`/properties/${p.slug}`}
                       style={{
-                        background: "white",
-                        borderRadius: "22px",
-                        overflow: "hidden",
-                        border: "1px solid #eef2f7",
-                        transition: "all .25s ease",
-                        boxShadow: "0 10px 24px rgba(15,23,42,.05)",
+                        textDecoration: "none",
                       }}
                     >
-                      <img
-                        src={p.img}
-                        alt={p.title}
+                      <article
                         style={{
-                          width: "100%",
-                          height: "220px",
-                          objectFit: "cover",
-                        }}
-                      />
-
-                      <div
-                        style={{
-                          padding: "16px",
+                          display: "grid",
+                          gridTemplateColumns: "360px 1fr",
+                          background: "#fff",
+                          borderRadius: "26px",
+                          overflow: "hidden",
+                          border: "1px solid #e5e7eb",
+                          boxShadow:
+                            "0 12px 40px rgba(15,23,42,.06)",
                         }}
                       >
+                        {/* IMAGE */}
+
                         <div
                           style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: "8px",
-                            marginBottom: "10px",
+                            position: "relative",
+                            minHeight: "280px",
+                            overflow: "hidden",
                           }}
                         >
-                          <span
+                          <PropertyImageSlider
+                            title={
+                              p.title ||
+                              p.t ||
+                              "Property Image"
+                            }
+                            images={
+                              p.images?.length
+                                ? p.images
+                                : [p.img, p.img, p.img]
+                            }
+                          />
+
+                          {/* VERIFIED */}
+
+                          <div
                             style={{
-                              background: "#ecfdf5",
-                              color: "#166534",
-                              padding: "5px 10px",
+                              position: "absolute",
+                              top: "16px",
+                              left: "16px",
+                              background: "#16a34a",
+                              color: "#fff",
+                              padding: "8px 14px",
+                              borderRadius: "999px",
+                              fontSize: "12px",
+                              fontWeight: 800,
+                              zIndex: 20,
+                            }}
+                          >
+                            VERIFIED
+                          </div>
+
+                          {/* BADGE */}
+
+                          {p.badge && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: "16px",
+                                left: "16px",
+                                background: "#111827",
+                                color: "#fff",
+                                padding: "8px 14px",
+                                borderRadius: "999px",
+                                fontSize: "12px",
+                                fontWeight: 700,
+                                zIndex: 20,
+                              }}
+                            >
+                              {p.badge}
+                            </div>
+                          )}
+
+                          {/* PHOTO COUNT */}
+
+                          <div
+                            style={{
+                              position: "absolute",
+                              bottom: "16px",
+                              right: "16px",
+                              background:
+                                "rgba(0,0,0,.75)",
+                              color: "#fff",
+                              padding: "8px 14px",
                               borderRadius: "999px",
                               fontSize: "12px",
                               fontWeight: 700,
+                              zIndex: 20,
                             }}
                           >
-                            {p.category || p.cat}
-                          </span>
-
-                          {p.rera && (
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: 700,
-                                color: "#dc2626",
-                              }}
-                            >
-                              RERA
-                            </span>
-                          )}
+                            📸 {images.length} Photos
+                          </div>
                         </div>
 
-                        <h3
-                          style={{
-                            margin: 0,
-                            fontSize: "1.02rem",
-                            fontWeight: 800,
-                            color: "#111827",
-                            lineHeight: 1.4,
-                            letterSpacing: "-0.02em",
-                          }}
-                        >
-                          {p.title || p.t}
-                        </h3>
+                        {/* CONTENT */}
 
                         <div
                           style={{
-                            marginTop: "8px",
-                            color: "#64748b",
-                            fontSize: "14px",
-                          }}
-                        >
-                          📍 {p.locality || p.loc}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: "14px",
+                            padding: "28px",
                             display: "flex",
+                            flexDirection: "column",
                             justifyContent: "space-between",
-                            alignItems: "center",
                           }}
                         >
                           <div>
                             <div
                               style={{
-                                fontSize: "1.45rem",
-                                fontWeight: 900,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                background: "#ecfdf5",
                                 color: "#166534",
+                                padding: "8px 14px",
+                                borderRadius: "999px",
+                                fontSize: "12px",
+                                fontWeight: 800,
+                                marginBottom: "16px",
                               }}
                             >
-                              {p.price || p.pr}
+                              {p.category || p.cat}
+                            </div>
+
+                            <h2
+                              style={{
+                                margin: 0,
+                                fontSize: "1.7rem",
+                                fontWeight: 900,
+                                color: "#111827",
+                                lineHeight: 1.3,
+                              }}
+                            >
+                              {p.title || p.t}
+                            </h2>
+
+                            <div
+                              style={{
+                                marginTop: "12px",
+                                color: "#64748b",
+                                fontSize: "15px",
+                              }}
+                            >
+                              📍 {p.locality || p.loc}
                             </div>
 
                             <div
                               style={{
-                                color: "#64748b",
-                                fontSize: "13px",
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: "12px",
+                                marginTop: "22px",
                               }}
                             >
-                              {p.area}
+                              <div style={featureBox}>
+                                📐 {p.area}
+                              </div>
+
+                              <div style={featureBox}>
+                                👁 {p.views || 0} views
+                              </div>
+
+                              {p.rera && (
+                                <div
+                                  style={{
+                                    ...featureBox,
+                                    background:
+                                      "#fee2e2",
+                                    color: "#b91c1c",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  RERA Approved
+                                </div>
+                              )}
                             </div>
                           </div>
 
+                          {/* FOOTER */}
+
                           <div
                             style={{
-                              fontSize: "13px",
-                              color: "#64748b",
+                              marginTop: "30px",
+                              display: "flex",
+                              justifyContent:
+                                "space-between",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                              gap: "18px",
                             }}
                           >
-                            👁 {p.views || 0}
+                            <div>
+                              <div
+                                style={{
+                                  fontSize: "2.1rem",
+                                  fontWeight: 900,
+                                  color: "#166534",
+                                }}
+                              >
+                                {p.price || p.pr}
+                              </div>
+
+                              <div
+                                style={{
+                                  fontSize: "13px",
+                                  color: "#64748b",
+                                  marginTop: "4px",
+                                }}
+                              >
+                                Negotiable Price
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "12px",
+                              }}
+                            >
+                              {/* CONTACT BUTTON FIXED */}
+
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setShowPopup(true);
+                                }}
+                                style={secondaryBtn}
+                              >
+                                Contact
+                              </button>
+
+                              <button
+                                style={primaryBtn}
+                              >
+                                View Details
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </article>
-                  </Link>
-                ))}
+                      </article>
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* EMPTY */}
+
               {properties.length === 0 && (
                 <div
                   style={{
-                    marginTop: "18px",
-                    background: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "18px",
-                    padding: "40px",
+                    background: "#fff",
+                    borderRadius: "22px",
+                    padding: "50px",
                     textAlign: "center",
+                    border: "1px solid #e5e7eb",
                     color: "#64748b",
+                    marginTop: "20px",
                   }}
                 >
                   No matching properties found.
@@ -451,11 +609,42 @@ export default async function PropertiesPage({
 
 const input = {
   width: "100%",
-  height: "44px",
-  borderRadius: "12px",
+  height: "48px",
+  borderRadius: "14px",
   border: "1px solid #e5e7eb",
-  padding: "0 14px",
-  marginBottom: "12px",
+  padding: "0 16px",
+  marginBottom: "14px",
   background: "#fff",
   fontSize: "14px",
+  outline: "none",
+};
+
+const featureBox = {
+  background: "#f8fafc",
+  padding: "10px 14px",
+  borderRadius: "14px",
+  fontSize: "13px",
+  color: "#334155",
+};
+
+const primaryBtn = {
+  height: "50px",
+  padding: "0 22px",
+  borderRadius: "14px",
+  border: "none",
+  background: "#16a34a",
+  color: "#fff",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
+const secondaryBtn = {
+  height: "50px",
+  padding: "0 22px",
+  borderRadius: "14px",
+  border: "1px solid #d1d5db",
+  background: "#fff",
+  color: "#111827",
+  fontWeight: 700,
+  cursor: "pointer",
 };

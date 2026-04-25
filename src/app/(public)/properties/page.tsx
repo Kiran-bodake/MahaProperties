@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
 import PropertyImageSlider from "@/components/property/PropertyImageSlider";
 import ContactPopup from "@/components/property/ContactPopup";
+
 type Property = {
   id?: string;
   _id?: string;
@@ -54,8 +55,12 @@ async function getProperties(params: {
     }/api/properties?${qs.toString()}`,
     {
       cache: "no-store",
-    },
+    }
   );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch properties");
+  }
 
   return res.json();
 }
@@ -66,7 +71,6 @@ export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [showPopup, setShowPopup] = useState(false);
 
-  // FIXED SEARCH PARAMS ERROR
   const q = searchParams.get("q") || "";
   const category = searchParams.get("category") || "";
   const locality = searchParams.get("locality") || "";
@@ -74,16 +78,23 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     async function loadData() {
-      const data = await getProperties({
-        q,
-        category,
-        locality,
-        sortBy,
-      });
+      try {
+        const data = await getProperties({
+          q,
+          category,
+          locality,
+          sortBy,
+        });
 
-      const result = Array.isArray(data) ? data : data.properties || [];
+        const result = Array.isArray(data)
+          ? data
+          : data.properties || [];
 
-      setProperties(result);
+        setProperties(result);
+      } catch (error) {
+        console.error("Property fetch error:", error);
+        setProperties([]);
+      }
     }
 
     loadData();
@@ -93,521 +104,871 @@ export default function PropertiesPage() {
     <>
       <MegaNavbar />
 
-      {/* CONTACT POPUP */}
-      <ContactPopup open={showPopup} onClose={() => setShowPopup(false)} />
+      <ContactPopup
+        open={showPopup}
+        onClose={() => setShowPopup(false)}
+      />
 
-      <main
-        style={{
-          background: "#f8fafc",
-          minHeight: "100vh",
-          padding: "100px 0 60px",
-        }}
-      >
-        <div
-          style={{
-            width: "min(1450px,95%)",
-            margin: "0 auto",
-          }}
-        >
-          {/* HERO SECTION */}
+      <main className="page">
+        <div className="container">
 
-          <section
-            style={{
-              background:
-                "linear-gradient(135deg,#052e16 0%, #166534 50%, #22c55e 100%)",
-              borderRadius: "28px",
-              padding: "42px",
-              color: "#fff",
-              marginBottom: "28px",
-              boxShadow: "0 25px 70px rgba(22,163,74,.25)",
-            }}
-          >
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "clamp(2rem,5vw,3.5rem)",
-                fontWeight: 900,
-                lineHeight: 1.05,
-                maxWidth: "800px",
-              }}
-            >
+          <section className="hero">
+            <h1>
               Discover Premium Properties in Nashik
             </h1>
 
-            <p
-              style={{
-                marginTop: "16px",
-                maxWidth: "760px",
-                lineHeight: 1.7,
-                color: "rgba(255,255,255,.9)",
-                fontSize: "15px",
-              }}
-            >
-              Explore verified NA plots, commercial properties, industrial
-              spaces, warehouses, and investment opportunities with trusted
-              pricing and premium locations.
+            <p>
+              Explore verified NA plots,
+              commercial properties,
+              warehouses, industrial spaces and
+              investment opportunities with
+              trusted pricing and premium
+              locations.
             </p>
           </section>
 
-          {/* MAIN LAYOUT */}
+          <section className="layout">
 
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: "320px 1fr",
-              gap: "24px",
-              alignItems: "start",
-            }}
-          >
-            {/* SIDEBAR */}
+            {/* 99ACRES STYLE FILTER */}
 
-            <aside
-              style={{
-                background: "#fff",
-                borderRadius: "24px",
-                padding: "22px",
-                border: "1px solid #e5e7eb",
-                position: "sticky",
-                top: "100px",
-                boxShadow: "0 10px 30px rgba(15,23,42,.05)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "1.2rem",
-                  fontWeight: 800,
-                  marginBottom: "20px",
-                  color: "#111827",
-                }}
-              >
-                Filter Properties
+            <aside className="sidebar">
+
+              <div className="filterHeader">
+                <h3>Filters</h3>
+
+                <span>
+                  {properties.length} Results
+                </span>
               </div>
 
               <form method="GET">
-                <input
-                  type="text"
-                  name="q"
-                  defaultValue={q}
-                  placeholder="Search properties..."
-                  style={input}
-                />
 
-                <select name="category" defaultValue={category} style={input}>
-                  <option value="">All Categories</option>
-                  <option>NA Plot</option>
-                  <option>Agriculture Land</option>
-                  <option>Commercial</option>
-                  <option>Industrial Shed</option>
-                  <option>Warehouse</option>
-                  <option>Investment Plot</option>
-                </select>
+                <div className="filterGroup">
+                  <label>Search</label>
 
-                <input
-                  type="text"
-                  name="locality"
-                  defaultValue={locality}
-                  placeholder="Enter locality"
-                  style={input}
-                />
+                  <input
+                    type="text"
+                    name="q"
+                    defaultValue={q}
+                    placeholder="Search properties..."
+                    className="input"
+                  />
+                </div>
 
-                <select name="sortBy" defaultValue={sortBy} style={input}>
-                  <option value="newest">Newest First</option>
+                <div className="filterGroup">
+                  <label>Property Type</label>
 
-                  <option value="price_asc">Price Low → High</option>
+                  <select
+                    name="category"
+                    defaultValue={category}
+                    className="input"
+                  >
+                    <option value="">
+                      All Categories
+                    </option>
 
-                  <option value="price_desc">Price High → Low</option>
+                    <option value="NA Plot">
+                      NA Plot
+                    </option>
 
-                  <option value="popular">Most Popular</option>
-                </select>
+                    <option value="Agriculture Land">
+                      Agriculture Land
+                    </option>
+
+                    <option value="Commercial">
+                      Commercial
+                    </option>
+
+                    <option value="Industrial Shed">
+                      Industrial Shed
+                    </option>
+
+                    <option value="Warehouse">
+                      Warehouse
+                    </option>
+
+                    <option value="Investment Plot">
+                      Investment Plot
+                    </option>
+                  </select>
+                </div>
+
+                <div className="filterGroup">
+                  <label>Location</label>
+
+                  <input
+                    type="text"
+                    name="locality"
+                    defaultValue={locality}
+                    placeholder="Enter locality"
+                    className="input"
+                  />
+                </div>
+
+                <div className="filterGroup">
+                  <label>Sort By</label>
+
+                  <select
+                    name="sortBy"
+                    defaultValue={sortBy}
+                    className="input"
+                  >
+                    <option value="newest">
+                      Newest First
+                    </option>
+
+                    <option value="price_asc">
+                      Price Low → High
+                    </option>
+
+                    <option value="price_desc">
+                      Price High → Low
+                    </option>
+
+                    <option value="popular">
+                      Most Popular
+                    </option>
+                  </select>
+                </div>
+
+                <div className="chipWrap">
+
+                  <button
+                    type="button"
+                    className="chip"
+                  >
+                    Verified
+                  </button>
+
+                  <button
+                    type="button"
+                    className="chip"
+                  >
+                    Premium
+                  </button>
+
+                  <button
+                    type="button"
+                    className="chip"
+                  >
+                    Ready To Move
+                  </button>
+
+                </div>
 
                 <button
                   type="submit"
-                  style={{
-                    width: "100%",
-                    height: "50px",
-                    borderRadius: "16px",
-                    border: "none",
-                    cursor: "pointer",
-                    background: "linear-gradient(135deg,#16a34a,#22c55e)",
-                    color: "#fff",
-                    fontWeight: 800,
-                    fontSize: "15px",
-                    marginTop: "6px",
-                  }}
+                  className="filterBtn"
                 >
                   Apply Filters
                 </button>
+
               </form>
+
             </aside>
 
-            {/* RIGHT SIDE */}
+            {/* RIGHT */}
 
-            <div>
-              {/* TOPBAR */}
+            <div className="content">
 
-              <div
-                style={{
-                  background: "#fff",
-                  borderRadius: "22px",
-                  padding: "18px 24px",
-                  border: "1px solid #e5e7eb",
-                  marginBottom: "22px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: "10px",
-                }}
-              >
+              <div className="topbar">
+
                 <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#16a34a",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: ".08em",
-                    }}
-                  >
-                    Property Results
-                  </div>
+                  <span className="topLabel">
+                    PROPERTY RESULTS
+                  </span>
 
-                  <div
-                    style={{
-                      marginTop: "6px",
-                      fontSize: "1.25rem",
-                      fontWeight: 900,
-                      color: "#111827",
-                    }}
-                  >
+                  <h2>
                     {properties.length} Properties Available
-                  </div>
+                  </h2>
                 </div>
 
-                <div
-                  style={{
-                    color: "#64748b",
-                    fontSize: "14px",
-                  }}
-                >
+                <p>
                   Verified listings updated daily
-                </div>
+                </p>
+
               </div>
 
-              {/* PROPERTY LIST */}
+              <div className="list">
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "22px",
-                }}
-              >
                 {properties.map((p) => {
                   const images =
-                    p.images && p.images.length > 0 ? p.images : [p.img];
+                    p.images &&
+                    p.images.length > 0
+                      ? p.images
+                      : [p.img];
 
                   return (
                     <Link
-                      key={p.id || p._id}
+                      key={
+                        p.id ||
+                        p._id ||
+                        p.slug
+                      }
                       href={`/properties/${p.slug}`}
-                      style={{
-                        textDecoration: "none",
-                      }}
+                      className="cardLink"
                     >
-                      <article
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "360px 1fr",
-                          background: "#fff",
-                          borderRadius: "26px",
-                          overflow: "hidden",
-                          border: "1px solid #e5e7eb",
-                          boxShadow: "0 12px 40px rgba(15,23,42,.06)",
-                        }}
-                      >
-                        {/* IMAGE */}
+                      <article className="card">
 
-                        <div
-                          style={{
-                            position: "relative",
-                            minHeight: "180px",
-                            overflow: "hidden",
-                          }}
-                        >
+                        <div className="imageWrap">
+
                           <PropertyImageSlider
-                            title={p.title || p.t || "Property Image"}
+                            title={
+                              p.title ||
+                              p.t ||
+                              "Property"
+                            }
                             images={
                               p.images?.length
                                 ? p.images
-                                : [p.img, p.img, p.img]
+                                : [
+                                    p.img,
+                                    p.img,
+                                    p.img,
+                                  ]
                             }
                           />
 
-                          {/* VERIFIED */}
-
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "16px",
-                              left: "16px",
-                              background: "#16a34a",
-                              color: "#fff",
-                              padding: "8px 14px",
-                              borderRadius: "999px",
-                              fontSize: "12px",
-                              fontWeight: 800,
-                              zIndex: 20,
-                            }}
-                          >
+                          <div className="verified">
                             VERIFIED
                           </div>
 
-                          {/* BADGE */}
-
                           {p.badge && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                bottom: "16px",
-                                left: "16px",
-                                background: "#111827",
-                                color: "#fff",
-                                padding: "8px 14px",
-                                borderRadius: "999px",
-                                fontSize: "12px",
-                                fontWeight: 700,
-                                zIndex: 20,
-                              }}
-                            >
+                            <div className="badge">
                               {p.badge}
                             </div>
                           )}
 
-                          {/* PHOTO COUNT */}
+                          <div className="photoCount">
+                            📸 {images.length}
+                          </div>
 
-                          {/* <div
-                            style={{
-                              position: "absolute",
-                              bottom: "36px",
-                              right: "16px",
-                              background: "rgba(0,0,0,.75)",
-                              color: "#fff",
-                              padding: "8px 14px",
-                              borderRadius: "999px",
-                              fontSize: "12px",
-                              fontWeight: 700,
-                              zIndex: 20,
-                            }}
-                          >
-                            📸 {images.length} Photos
-                          </div> */}
                         </div>
 
-                        {/* CONTENT */}
+                        <div className="cardContent">
 
-                        <div
-                          style={{
-                            padding: "18px",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between",
-                          }}
-                        >
                           <div>
-                            <div
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                background: "#ecfdf5",
-                                color: "#166534",
-                                padding: "8px 14px",
-                                borderRadius: "999px",
-                                fontSize: "12px",
-                                fontWeight: 800,
-                                marginBottom: "16px",
-                              }}
-                            >
-                              {p.category || p.cat}
+
+                            <div className="category">
+                              {p.category ||
+                                p.cat}
                             </div>
 
-                            <h2
-                              style={{
-                                margin: 0,
-                                fontSize: "1.3rem",
-                                fontWeight: 900,
-                                color: "#111827",
-                                lineHeight: 1.3,
-                              }}
-                            >
+                            <h3 className="title">
                               {p.title || p.t}
-                            </h2>
+                            </h3>
 
-                            <div
-                              style={{
-                                marginTop: "12px",
-                                color: "#64748b",
-                                fontSize: "15px",
-                              }}
-                            >
-                              📍 {p.locality || p.loc}
-                            </div>
+                            <p className="location">
+                              📍{" "}
+                              {p.locality ||
+                                p.loc}
+                            </p>
 
-                            <div
-                              style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: "12px",
-                                marginTop: "14px",
-                              }}
-                            >
-                              <div style={featureBox}>📐 {p.area}</div>
+                            <div className="features">
 
-                              <div style={featureBox}>
+                              <div className="feature">
+                                📐 {p.area}
+                              </div>
+
+                              <div className="feature">
                                 👁 {p.views || 0} views
                               </div>
 
                               {p.rera && (
-                                <div
-                                  style={{
-                                    ...featureBox,
-                                    background: "#fee2e2",
-                                    color: "#b91c1c",
-                                    fontWeight: 700,
-                                  }}
-                                >
+                                <div className="rera">
                                   RERA Approved
                                 </div>
                               )}
+
                             </div>
+
                           </div>
 
-                          {/* FOOTER */}
+                          <div className="footer">
 
-                          <div
-                            style={{
-                              marginTop: "18px",
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              flexWrap: "wrap",
-                              gap: "18px",
-                            }}
-                          >
                             <div>
-                              <div
-                                style={{
-                                  fontSize: "1.6rem",
-                                  fontWeight: 900,
-                                  color: "#166534",
-                                }}
-                              >
-                                {p.price || p.pr}
+
+                              <div className="price">
+                                {p.price ||
+                                  p.pr}
                               </div>
 
-                              <div
-                                style={{
-                                  fontSize: "13px",
-                                  color: "#64748b",
-                                  marginTop: "4px",
-                                }}
-                              >
-                                Negotiable Price
-                              </div>
+                              <span className="neg">
+                                Negotiable
+                              </span>
+
                             </div>
 
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "12px",
-                              }}
-                            >
-                              {/* CONTACT BUTTON FIXED */}
+                            <div className="btns">
 
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setShowPopup(true);
                                 }}
-                                style={secondaryBtn}
+                                className="secondaryBtn"
                               >
                                 Contact
                               </button>
 
-                              <button style={primaryBtn}>View Details</button>
+                              <button
+                                type="button"
+                                className="primaryBtn"
+                              >
+                                View Details
+                              </button>
+
                             </div>
+
                           </div>
+
                         </div>
+
                       </article>
                     </Link>
                   );
                 })}
+
               </div>
 
-              {/* EMPTY */}
-
               {properties.length === 0 && (
-                <div
-                  style={{
-                    background: "#fff",
-                    borderRadius: "22px",
-                    padding: "50px",
-                    textAlign: "center",
-                    border: "1px solid #e5e7eb",
-                    color: "#64748b",
-                    marginTop: "20px",
-                  }}
-                >
+                <div className="empty">
                   No matching properties found.
                 </div>
               )}
+
             </div>
+
           </section>
+
         </div>
+
+        <style jsx>{`
+
+          .page {
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: 90px 0 40px;
+          }
+
+          .container {
+            width: min(1400px, 94%);
+            margin: auto;
+          }
+
+          .hero {
+            background: linear-gradient(
+              135deg,
+              #052e16,
+              #166534,
+              #22c55e
+            );
+
+            border-radius: 28px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 24px;
+          }
+
+          .hero h1 {
+            margin: 0;
+            font-size: clamp(
+              2rem,
+              6vw,
+              3.5rem
+            );
+
+            font-weight: 900;
+          }
+
+          .hero p {
+            margin-top: 16px;
+            max-width: 760px;
+            line-height: 1.7;
+          }
+
+          .layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+            align-items: start;
+          }
+
+          /* SIDEBAR */
+
+          .sidebar {
+            background: white;
+
+            border-radius: 24px;
+
+            padding: 24px;
+
+            border: 1px solid #e5e7eb;
+
+            position: sticky;
+
+            top: 100px;
+
+            height: fit-content;
+
+            box-shadow:
+              0 10px 30px rgba(0,0,0,0.05);
+          }
+
+          .filterHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 24px;
+
+            padding-bottom: 16px;
+
+            border-bottom: 1px solid #f1f5f9;
+          }
+
+          .filterHeader h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+          }
+
+          .filterHeader span {
+            background: #dcfce7;
+            color: #166534;
+
+            padding: 8px 12px;
+
+            border-radius: 999px;
+
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          .filterGroup {
+            margin-bottom: 18px;
+          }
+
+          .filterGroup label {
+            display: block;
+
+            margin-bottom: 10px;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            color: #374151;
+          }
+
+          .input {
+            width: 100%;
+
+            height: 52px;
+
+            border-radius: 14px;
+
+            border: 1px solid #d1d5db;
+
+            padding: 0 16px;
+
+            background: #f9fafb;
+
+            font-size: 14px;
+
+            transition: 0.3s ease;
+          }
+
+          .input:focus {
+            outline: none;
+
+            border-color: #16a34a;
+
+            background: white;
+
+            box-shadow:
+              0 0 0 4px rgba(34,197,94,0.15);
+          }
+
+          .chipWrap {
+            display: flex;
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-bottom: 24px;
+          }
+
+          .chip {
+            border: none;
+
+            background: #f1f5f9;
+
+            padding: 10px 14px;
+
+            border-radius: 999px;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.3s ease;
+          }
+
+          .chip:hover {
+            background: #dcfce7;
+            color: #166534;
+          }
+
+          .filterBtn {
+            width: 100%;
+
+            height: 54px;
+
+            border: none;
+
+            border-radius: 16px;
+
+            background: linear-gradient(
+              135deg,
+              #16a34a,
+              #22c55e
+            );
+
+            color: white;
+
+            font-size: 15px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            transition: 0.3s ease;
+          }
+
+          .filterBtn:hover {
+            transform: translateY(-2px);
+          }
+
+          /* TOPBAR */
+
+          .topbar {
+            background: white;
+
+            border-radius: 22px;
+
+            padding: 18px 22px;
+
+            border: 1px solid #e5e7eb;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 12px;
+
+            margin-bottom: 22px;
+          }
+
+          .topLabel {
+            color: #16a34a;
+
+            font-size: 12px;
+
+            font-weight: 800;
+          }
+
+          .topbar h2 {
+            margin: 8px 0 0;
+          }
+
+          .topbar p {
+            color: #64748b;
+          }
+
+          .list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+          }
+
+          .cardLink {
+            text-decoration: none;
+          }
+
+          .card {
+            display: grid;
+
+            grid-template-columns: 340px 1fr;
+
+            background: white;
+
+            border-radius: 24px;
+
+            overflow: hidden;
+
+            border: 1px solid #e5e7eb;
+          }
+
+          .imageWrap {
+            position: relative;
+            min-height: 250px;
+          }
+
+          .verified {
+            position: absolute;
+
+            top: 14px;
+            left: 14px;
+
+            background: #16a34a;
+
+            color: white;
+
+            padding: 8px 14px;
+
+            border-radius: 999px;
+
+            font-size: 11px;
+
+            z-index: 10;
+          }
+
+          .badge {
+            position: absolute;
+
+            bottom: 14px;
+            left: 14px;
+
+            background: black;
+
+            color: white;
+
+            padding: 8px 14px;
+
+            border-radius: 999px;
+
+            font-size: 11px;
+
+            z-index: 10;
+          }
+
+          .photoCount {
+            position: absolute;
+
+            bottom: 14px;
+            right: 14px;
+
+            background: rgba(0,0,0,0.7);
+
+            color: white;
+
+            padding: 8px 14px;
+
+            border-radius: 999px;
+
+            font-size: 11px;
+
+            z-index: 10;
+          }
+
+          .cardContent {
+            padding: 22px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+          }
+
+          .category {
+            display: inline-flex;
+
+            background: #ecfdf5;
+
+            color: #166534;
+
+            padding: 8px 14px;
+
+            border-radius: 999px;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            margin-bottom: 14px;
+          }
+
+          .title {
+            margin: 0;
+
+            color: #111827;
+
+            font-size: 1.5rem;
+          }
+
+          .location {
+            margin-top: 12px;
+
+            color: #64748b;
+          }
+
+          .features {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-top: 16px;
+          }
+
+          .feature {
+            background: #f1f5f9;
+
+            padding: 10px 14px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+          }
+
+          .rera {
+            background: #fee2e2;
+
+            color: #b91c1c;
+
+            padding: 10px 14px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+          }
+
+          .footer {
+            margin-top: 22px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 16px;
+          }
+
+          .price {
+            color: #166534;
+
+            font-size: 1.8rem;
+
+            font-weight: 900;
+          }
+
+          .neg {
+            color: #64748b;
+
+            font-size: 13px;
+          }
+
+          .btns {
+            display: flex;
+            gap: 10px;
+          }
+
+          .primaryBtn {
+            height: 48px;
+
+            padding: 0 20px;
+
+            border: none;
+
+            border-radius: 14px;
+
+            background: #16a34a;
+
+            color: white;
+
+            font-weight: 800;
+
+            cursor: pointer;
+          }
+
+          .secondaryBtn {
+            height: 48px;
+
+            padding: 0 20px;
+
+            border-radius: 14px;
+
+            border: 1px solid #d1d5db;
+
+            background: white;
+
+            font-weight: 700;
+
+            cursor: pointer;
+          }
+
+          .empty {
+            background: white;
+
+            padding: 50px;
+
+            border-radius: 22px;
+
+            text-align: center;
+
+            margin-top: 20px;
+          }
+
+          @media (max-width: 1024px) {
+
+            .layout {
+              grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+              position: relative;
+              top: 0;
+            }
+
+          }
+
+          @media (max-width: 768px) {
+
+            .card {
+              grid-template-columns: 1fr;
+            }
+
+            .footer {
+              flex-direction: column;
+              align-items: stretch;
+            }
+
+            .btns {
+              width: 100%;
+            }
+
+            .primaryBtn,
+            .secondaryBtn {
+              width: 100%;
+            }
+
+          }
+
+        `}</style>
+
       </main>
     </>
   );
 }
-
-const input = {
-  width: "100%",
-  height: "48px",
-  borderRadius: "14px",
-  border: "1px solid #e5e7eb",
-  padding: "0 16px",
-  marginBottom: "14px",
-  background: "#fff",
-  fontSize: "14px",
-  outline: "none",
-};
-
-const featureBox = {
-  background: "#f8fafc",
-  padding: "10px 14px",
-  borderRadius: "14px",
-  fontSize: "13px",
-  color: "#334155",
-};
-
-const primaryBtn = {
-  height: "50px",
-  padding: "0 22px",
-  borderRadius: "14px",
-  border: "none",
-  background: "#16a34a",
-  color: "#fff",
-  fontWeight: 800,
-  cursor: "pointer",
-};
-
-const secondaryBtn = {
-  height: "50px",
-  padding: "0 22px",
-  borderRadius: "14px",
-  border: "1px solid #d1d5db",
-  background: "#fff",
-  color: "#111827",
-  fontWeight: 700,
-  cursor: "pointer",
-};

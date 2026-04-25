@@ -25,7 +25,7 @@
     "clsx": "^2.1.1",
     "csvtojson": "^2.0.14",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.36.0",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.577.0",
     "mongoose": "^9.3.0",
     "next": "16.1.6",
@@ -49,12 +49,14 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.5.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.2.4",
     "typescript": "^5"
   }
 }

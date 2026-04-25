@@ -445,7 +445,7 @@ export function Navbar() {
   };
 
   /* colour helpers */
-  const onDark = !scrolled && atTop; /* transparent phase = text white */
+  const onDark = false; /* transparent phase = text white */
   const logoTxt = onDark ? "#ffffff" : "#14532d";
   const logoSub = onDark ? "rgba(255,255,255,0.65)" : "#6b7280";
   const navTxt = onDark ? "rgba(255,255,255,0.88)" : "#374151";
@@ -1223,7 +1223,7 @@ export function Navbar() {
         </div>
 
         {/* ── NAV PILLS / SUBMENU ROW ── */}
-        {scrolled ? (
+        {true && (
           <div
             style={{
               borderTop: "1px solid #e5e7eb",
@@ -1341,72 +1341,6 @@ export function Navbar() {
               </div>
             </div>
           </div>
-        ) : (
-          atTop && (
-            <div
-              style={{
-                borderTop: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(0,0,0,0.18)",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              <div
-                className="container"
-                style={{
-                  display: "flex",
-                  gap: "4px",
-                  padding: "0 20px",
-                  overflowX: "auto",
-                  scrollbarWidth: "none",
-                  alignItems: "center",
-                  height: "44px",
-                }}
-              >
-                {[
-                  "All Properties",
-                  "NA Plots",
-                  "Collector NA",
-                  "Agriculture Land",
-                  "Warehouse",
-                  "Commercial",
-                  "Investment Plots",
-                  "Farmhouses",
-                ].map((t, i) => (
-                  <Link
-                    key={t}
-                    href={`/properties?cat=${t.toLowerCase().replace(/\s+/g, "-")}`}
-                    style={{
-                      whiteSpace: "nowrap",
-                      padding: "5px 14px",
-                      borderRadius: "100px",
-                      fontSize: "12.5px",
-                      fontWeight: 600,
-                      color: i === 0 ? "#14532d" : "rgba(255,255,255,0.85)",
-                      background: i === 0 ? "white" : "rgba(255,255,255,0.1)",
-                      border:
-                        i === 0 ? "none" : "1px solid rgba(255,255,255,0.15)",
-                      transition: "all 0.18s",
-                      flexShrink: 0,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (i !== 0) {
-                        (e.currentTarget as HTMLElement).style.background =
-                          "rgba(255,255,255,0.2)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (i !== 0) {
-                        (e.currentTarget as HTMLElement).style.background =
-                          "rgba(255,255,255,0.1)";
-                      }
-                    }}
-                  >
-                    {t}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )
         )}
       </header>
 

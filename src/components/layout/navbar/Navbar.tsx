@@ -676,6 +676,7 @@ export function Navbar() {
             height: "100px",
             gap: "0",
             transition: "height 0.35s ease",
+            paddingLeft: "0px",
           }}
         >
           {/* ── LOGO ── */}
@@ -688,7 +689,7 @@ export function Navbar() {
               gap: "10px",
               textDecoration: "none",
               flexShrink: 0,
-              marginRight: "18px",
+              marginRight: "8px",
               marginLeft: "0px",
             }}
           >
@@ -1238,7 +1239,7 @@ export function Navbar() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: "8px",
-                padding: "0 20px",
+                paddingLeft: "30px",
                 overflowX: "auto",
                 minHeight: "44px",
               }}

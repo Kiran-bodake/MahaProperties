@@ -4,6 +4,16 @@ import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
 import properties from "@/moc-data/properties.json";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Instagram,
+  Facebook,
+  Youtube,
+  Twitter,
+} from "lucide-react";
+import { Footer } from "../layout/footer";
 /* ═══════════════════════════════════════════════════════════
    TOKENS
 ═══════════════════════════════════════════════════════════ */
@@ -398,6 +408,20 @@ const I = {
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
     </svg>
   ),
+  mail: (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <polyline points="3,7 12,13 21,7" />
+    </svg>
+  ),
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -722,44 +746,44 @@ const WHY = [
   },
 ];
 
-const TESTI = [
-  {
-    n: "Rahul Deshmukh",
-    r: "Bought NA Plot",
-    lc: "Gangapur Road",
-    av: "R",
-    col: "#1a6b3c",
-    pImg: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=75",
-    txt: "Found the perfect NA plot within budget. Zero surprises at registration. I'd searched 8 months before finding MahaProperties — closed in 2 weeks.",
-  },
-  {
-    n: "Sunita Patil",
-    r: "Agriculture Land",
-    lc: "Igatpuri",
-    av: "S",
-    col: "#0891b2",
-    pImg: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&q=75",
-    txt: "Six months of searching ended in one week. Three verified options, clear titles. RERA compliance gave me full confidence.",
-  },
-  {
-    n: "Vikram Joshi",
-    r: "Industrial Shed",
-    lc: "MIDC Satpur",
-    av: "V",
-    col: "#7c3aed",
-    pImg: "https://images.unsplash.com/photo-1565891741441-64926e441838?w=400&q=75",
-    txt: "Needed a shed near MIDC Satpur urgently. Five verified listings in 24 hours, deal closed in 2 weeks. Outstanding.",
-  },
-  {
-    n: "Priya Kulkarni",
-    r: "Investment Plots",
-    lc: "Meri Village",
-    av: "P",
-    col: "#c8973a",
-    pImg: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=75",
-    txt: "Invested in two plots. Already 35% appreciation in 18 months. Their knowledge of Nashik&apos;s micro-markets is unmatched.",
-  },
-];
+// const TESTI = [
+//   {
+//     n: "Rahul Deshmukh",
+//     r: "Bought NA Plot",
+//     lc: "Gangapur Road",
+//     av: "R",
+//     col: "#1a6b3c",
+//     pImg: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=75",
+//     txt: "Found the perfect NA plot within budget. Zero surprises at registration. I'd searched 8 months before finding MahaProperties — closed in 2 weeks.",
+//   },
+//   {
+//     n: "Sunita Patil",
+//     r: "Agriculture Land",
+//     lc: "Igatpuri",
+//     av: "S",
+//     col: "#0891b2",
+//     pImg: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&q=75",
+//     txt: "Six months of searching ended in one week. Three verified options, clear titles. RERA compliance gave me full confidence.",
+//   },
+//   {
+//     n: "Vikram Joshi",
+//     r: "Industrial Shed",
+//     lc: "MIDC Satpur",
+//     av: "V",
+//     col: "#7c3aed",
+//     pImg: "https://images.unsplash.com/photo-1565891741441-64926e441838?w=400&q=75",
+//     txt: "Needed a shed near MIDC Satpur urgently. Five verified listings in 24 hours, deal closed in 2 weeks. Outstanding.",
+//   },
+//   {
+//     n: "Priya Kulkarni",
+//     r: "Investment Plots",
+//     lc: "Meri Village",
+//     av: "P",
+//     col: "#c8973a",
+//     pImg: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=75",
+//     txt: "Invested in two plots. Already 35% appreciation in 18 months. Their knowledge of Nashik&apos;s micro-markets is unmatched.",
+//   },
+// ];
 
 // const BLOGS = [
 //   { s:"na-plot-guide",      t:"Complete Guide to Buying NA Plots in Nashik 2025",    cat:"Buying Guide", d:"Jan 15", r:"8 min", img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=75", feat:true  },
@@ -2522,19 +2546,29 @@ function WhyNashik() {
 /* ═══════════════════════════════════════════════════════════
    TESTIMONIALS  — property image + client avatar
 ═══════════════════════════════════════════════════════════ */
-function Testi() {
+function Testi({ testimonials }: any) {
   const [ac, setAc] = useState(0);
   const [ref, vis] = useInView();
 
+  const data = testimonials || [];
+
   useEffect(() => {
+    if (data.length === 0) return;
     const interval = setInterval(() => {
-      setAc((prev) => (prev + 1) % TESTI.length);
+      setAc((prev) => (prev + 1) % data.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [data.length]);
 
-  const T = TESTI[ac];
+  useEffect(() => {
+    setAc(0);
+  }, [data.length]);
+
+  if (!testimonials || testimonials.length === 0) return null;
+
+  const T = data[ac];
+  if (!T) return null;
 
   return (
     <section
@@ -2562,7 +2596,7 @@ function Testi() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1.05fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
             gap: "32px",
             alignItems: "start",
           }}
@@ -2699,7 +2733,7 @@ function Testi() {
             >
               <button
                 onClick={() =>
-                  setAc((a) => (a - 1 + TESTI.length) % TESTI.length)
+                  setAc((a) => (a - 1 + data.length) % data.length)
                 }
                 className="b bo"
                 style={{
@@ -2712,7 +2746,7 @@ function Testi() {
                 {I.arL}
               </button>
               <div style={{ display: "flex", gap: "5px" }}>
-                {TESTI.map((_, i) => (
+                {data.map((_: any, i: number) => (
                   <button
                     key={i}
                     onClick={() => setAc(i)}
@@ -2729,7 +2763,7 @@ function Testi() {
                 ))}
               </div>
               <button
-                onClick={() => setAc((a) => (a + 1) % TESTI.length)}
+                onClick={() => setAc((a) => (a + 1) % data.length)}
                 className="b bo"
                 style={{
                   width: "38px",
@@ -2742,10 +2776,9 @@ function Testi() {
               </button>
             </div>
           </div>
-
           {/* Right: client list */}
           <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
-            {TESTI.map((t, i) => (
+            {data.map((t: any, i: number) => (
               <button
                 key={t.n}
                 onClick={() => setAc(i)}
@@ -2762,8 +2795,8 @@ function Testi() {
                   boxShadow:
                     ac === i ? "0 3px 14px rgba(26,107,60,.09)" : "none",
                   transition: `all .2s ${E}`,
-                  opacity: vis ? 1 : 0,
-                  transform: vis ? "none" : "translateX(14px)",
+                  opacity: 1,
+                  transform: "none",
                 }}
               >
                 <div
@@ -3176,194 +3209,280 @@ function CTA() {
 /* ═══════════════════════════════════════════════════════════
    FOOTER  — single, best UI
 ═══════════════════════════════════════════════════════════ */
-const FCOLS = [
-  {
-    t: "NA Plots",
-    ll: [
-      ["NA Plots On Gangapur Road", "#"],
-      ["NA Plots On Nashik Road", "#"],
-      ["NA Plots In Meri", "#"],
-      ["NA Plots In Igatpuri", "#"],
-      ["NA Plots On Trimbak Road", "#"],
-      ["Collector NA Plot", "#"],
-    ],
-  },
-  {
-    t: "Agriculture",
-    ll: [
-      ["Agriculture Land In Nashik", "#"],
-      ["Farm Land In Igatpuri", "#"],
-      ["Farmhouse Plots In Nashik", "#"],
-      ["Grape Farm Land", "#"],
-      ["Warehouse Land", "#"],
-      ["Industrial Sheds MIDC", "#"],
-    ],
-  },
-  {
-    t: "Commercial",
-    ll: [
-      ["Commercial Plots In Nashik", "#"],
-      ["Plots In Satpur MIDC", "#"],
-      ["Industrial Plots In Ambad", "#"],
-      ["Showroom / Office Space", "#"],
-      ["Investment Plots In Nashik", "#"],
-      ["Collector NA Plots InNashik", "#"],
-    ],
-  },
-  {
-    t: "Company",
-    ll: [
-      ["About Us", "#"],
-      ["Post Property", "#"],
-      ["Blogs", "#"],
-      ["Contact Us", "#"],
-      ["Privacy Policy", "#"],
-      ["Terms of Use", "#"],
-    ],
-  },
-];
+// export const FCOLS = [
+//   {
+//     t: "NA Plots",
+//     ll: [
+//       ["NA Plots On Gangapur Road", "#"],
+//       ["NA Plots On Nashik Road", "#"],
+//       ["NA Plots In Meri", "#"],
+//       ["NA Plots In Igatpuri", "#"],
+//       ["NA Plots On Trimbak Road", "#"],
+//       ["Collector NA Plot", "#"],
+//     ],
+//   },
+//   {
+//     t: "Agriculture",
+//     ll: [
+//       ["Agriculture Land In Nashik", "#"],
+//       ["Farm Land In Igatpuri", "#"],
+//       ["Farmhouse Plots In Nashik", "#"],
+//       ["Grape Farm Land", "#"],
+//       ["Warehouse Land", "#"],
+//       ["Industrial Sheds MIDC", "#"],
+//     ],
+//   },
+//   {
+//     t: "Commercial",
+//     ll: [
+//       ["Commercial Plots In Nashik", "#"],
+//       ["Plots In Satpur MIDC", "#"],
+//       ["Industrial Plots In Ambad", "#"],
+//       ["Showroom / Office Space", "#"],
+//       ["Investment Plots In Nashik", "#"],
+//       ["Collector NA Plots InNashik", "#"],
+//     ],
+//   },
+//   {
+//     t: "Company",
+//     ll: [
+//       ["About Us", "#"],
+//       ["Post Property", "#"],
+//       ["Blogs", "#"],
+//       ["Contact Us", "#"],
+//       ["Privacy Policy", "#"],
+//       ["Terms of Use", "#"],
+//     ],
+//   },
+// ];
 
-function Foot() {
-  const lk: React.CSSProperties = {
-    fontSize: "12.5px",
-    color: "white",
-    transition: `color .14s ${E}`,
-  };
-  return (
-    <footer style={{ background: "#070b0e", color: "white" }}>
-      <div className="w" style={{ paddingTop: "52px", paddingBottom: "36px" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.25fr repeat(4,1fr)",
-            gap: "36px",
-            marginBottom: "36px",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "18px",
-              }}
-            >
-              <Image
-                src="/maha.png"
-                alt="Maha Properties Logo"
-                width={150}
-                height={50}
-                style={{
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-            <p
-              style={{
-                fontSize: "12.5px",
-                lineHeight: 1.72,
-                marginBottom: "16px",
-                maxWidth: "210px",
-              }}
-            >
-              Nashik&apos;s most comprehensive property portal — NA plots,
-              agriculture, commercial & industrial since 2018.
-            </p>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "7px" }}
-            >
-              <a
-                href="tel:+919876543210"
-                style={{
-                  ...lk,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  color: "white",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
-              >
-                <span style={{ color: "#2d9455" }}>{I.ph}</span>+91 98765 43210
-              </a>
-              <a
-                href="mailto:hello@mahaproperties.in"
-                style={{ ...lk, color: "white" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
-              >
-                hello@mahaproperties.in
-              </a>
-            </div>
-          </div>
-          {FCOLS.map((col) => (
-            <div key={col.t}>
-              <h5
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: "rgba(255,255,255,.48)",
-                  letterSpacing: ".08em",
-                  textTransform: "uppercase",
-                  marginBottom: "14px",
-                }}
-              >
-                {col.t}
-              </h5>
-              <ul
-                style={{
-                  listStyle: "none",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "9px",
-                }}
-              >
-                {col.ll.map(([l, h]) => (
-                  <li key={l}>
-                    <a
-                      href={h}
-                      style={lk}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.color = "#e8ffda")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.color = "white")
-                      }
-                    >
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div
-          style={{
-            height: "1px",
-            background: "rgba(255,255,255,.055)",
-            marginBottom: "18px",
-          }}
-        />
-        <div
-          style={{ display: "flex", alignItems: "center", fontSize: "12px" }}
-        >
-          <span style={{ whiteSpace: "nowrap" }}>
-            {" "}
-            © 2026 MahaProperties. All rights reserved. Made with ❤️ in Nashik.
-          </span>
-          <span style={{ marginLeft: "570px", whiteSpace: "nowrap" }}>
-            Developed by G.K. Digital
-          </span>
-        </div>
-        {/* <div style={{ marginTop:"16px", textAlign:"center" }}>
-          <span style={{ fontSize:"1.2rem", fontWeight:800, color:"#0a0f14", letterSpacing:"0.03em" }}>Mahaproperties</span>
-        </div> */}
-      </div>
-    </footer>
-  );
-}
+// function Foot() {
+//   const lk: React.CSSProperties = {
+//     fontSize: "12.5px",
+//     color: "white",
+//     transition: `color .14s ${E}`,
+//   };
+//   return (
+//     <footer style={{ background: "#070b0e", color: "white" }}>
+//       <div className="w" style={{ paddingTop: "52px", paddingBottom: "36px" }}>
+//         <div
+//           style={{
+//             display: "grid",
+//             gridTemplateColumns: "1.25fr repeat(4,1fr)",
+//             gap: "36px",
+//             marginBottom: "36px",
+//           }}
+//         >
+//           <div>
+//             <div
+//               style={{
+//                 display: "flex",
+//                 alignItems: "center",
+//                 gap: "8px",
+//                 marginBottom: "18px",
+//               }}
+//             >
+//               <Image
+//                 src="/maha.png"
+//                 alt="Maha Properties Logo"
+//                 width={150}
+//                 height={50}
+//                 style={{
+//                   objectFit: "contain",
+//                 }}
+//               />
+//             </div>
+//             <p
+//               style={{
+//                 fontSize: "12.5px",
+//                 lineHeight: 1.72,
+//                 marginBottom: "16px",
+//                 maxWidth: "210px",
+//               }}
+//             >
+//               Nashik&apos;s most comprehensive property portal — NA plots,
+//               agriculture, commercial & industrial since 2018.
+//             </p>
+//             <div
+//               style={{ display: "flex", flexDirection: "column", gap: "7px" }}
+//             >
+//               <a
+//                 href="tel:+919876543210"
+//                 style={{
+//                   ...lk,
+//                   display: "flex",
+//                   alignItems: "center",
+//                   gap: "6px",
+//                   color: "white",
+//                 }}
+//                 onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+//                 onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
+//               >
+//                 <span style={{ color: "#2d9455" }}>{I.ph}</span>+91 98765 43210
+//               </a>
+//               <a
+//                 href="mailto:hello@mahaproperties.in"
+//                 style={{
+//                   ...lk,
+//                   display: "flex",
+//                   alignItems: "center", // ✅ center align
+//                   gap: "6px",
+//                   color: "white",
+//                 }}
+//                 onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+//                 onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
+//               >
+//                 <span
+//                   style={{
+//                     color: "#2d9455",
+//                     flexShrink: 0,
+//                     marginTop: "1px",
+//                   }}
+//                 >
+//                   {I.mail}
+//                 </span>
+
+//                 <span
+//                   style={{
+//                     fontSize: "12.5px",
+//                     lineHeight: "1.4",
+//                     wordBreak: "break-word",
+//                   }}
+//                 >
+//                   hello@mahaproperties.in
+//                 </span>
+//               </a>
+//               <div
+//                 style={{
+//                   display: "flex",
+//                   alignItems: "flex-start",
+//                   gap: "8px",
+//                 }}
+//               >
+//                 <MapPin
+//                   size={14}
+//                   color="#4ade82"
+//                   style={{
+//                     marginTop: "2px",
+//                     flexShrink: 0,
+//                   }}
+//                 />
+
+//                 <span
+//                   style={{
+//                     fontSize: "12.5px",
+//                     color: "#ffffff",
+//                     lineHeight: "1.4",
+//                   }}
+//                 >
+//                   Nashik, Maharashtra 422001
+//                 </span>
+//               </div>
+//             </div>
+//             <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
+//               {[Instagram, Facebook, Youtube, Twitter].map((Icon, i) => (
+//                 <a
+//                   key={i}
+//                   href="#"
+//                   style={{
+//                     width: "36px",
+//                     height: "36px",
+//                     borderRadius: "10px",
+//                     background: "rgba(255,255,255,0.05)",
+//                     border: "1px solid rgba(255,255,255,0.08)",
+//                     display: "flex",
+//                     alignItems: "center",
+//                     justifyContent: "center",
+//                     color: "#9ca3af",
+//                     transition: "all 0.2s",
+//                   }}
+//                   onMouseEnter={(e) => {
+//                     (e.currentTarget as HTMLElement).style.background =
+//                       "rgba(22,163,74,0.2)";
+//                     (e.currentTarget as HTMLElement).style.color = "#4ade82";
+//                     (e.currentTarget as HTMLElement).style.borderColor =
+//                       "rgba(74,222,128,0.3)";
+//                   }}
+//                   onMouseLeave={(e) => {
+//                     (e.currentTarget as HTMLElement).style.background =
+//                       "rgba(255,255,255,0.05)";
+//                     (e.currentTarget as HTMLElement).style.color = "#9ca3af";
+//                     (e.currentTarget as HTMLElement).style.borderColor =
+//                       "rgba(255,255,255,0.08)";
+//                   }}
+//                 >
+//                   <Icon size={15} />
+//                 </a>
+//               ))}
+//             </div>
+//           </div>
+//           {FCOLS.map((col) => (
+//             <div key={col.t}>
+//               <h5
+//                 style={{
+//                   fontSize: "11px",
+//                   fontWeight: 700,
+//                   color: "rgba(255,255,255,.48)",
+//                   letterSpacing: ".08em",
+//                   textTransform: "uppercase",
+//                   marginBottom: "14px",
+//                 }}
+//               >
+//                 {col.t}
+//               </h5>
+//               <ul
+//                 style={{
+//                   listStyle: "none",
+//                   display: "flex",
+//                   flexDirection: "column",
+//                   gap: "9px",
+//                 }}
+//               >
+//                 {col.ll.map(([l, h]) => (
+//                   <li key={l}>
+//                     <a
+//                       href={h}
+//                       style={lk}
+//                       onMouseEnter={(e) =>
+//                         (e.currentTarget.style.color = "#e8ffda")
+//                       }
+//                       onMouseLeave={(e) =>
+//                         (e.currentTarget.style.color = "white")
+//                       }
+//                     >
+//                       {l}
+//                     </a>
+//                   </li>
+//                 ))}
+//               </ul>
+//             </div>
+//           ))}
+//         </div>
+//         <div
+//           style={{
+//             height: "1px",
+//             background: "rgba(255,255,255,.055)",
+//             marginBottom: "18px",
+//           }}
+//         />
+//         <div
+//           style={{ display: "flex", alignItems: "center", fontSize: "12px" }}
+//         >
+//           <span style={{ whiteSpace: "nowrap" }}>
+//             {" "}
+//             © 2026 MahaProperties. All rights reserved. Made with ❤️ in Nashik.
+//           </span>
+//           <span style={{ marginLeft: "570px", whiteSpace: "nowrap" }}>
+//             Developed by G.K. Digital
+//           </span>
+//         </div>
+//         {/* <div style={{ marginTop:"16px", textAlign:"center" }}>
+//           <span style={{ fontSize:"1.2rem", fontWeight:800, color:"#0a0f14", letterSpacing:"0.03em" }}>Mahaproperties</span>
+//         </div> */}
+//       </div>
+//     </footer>
+//   );
+// }
 
 /* ═══════════════════════════════════════════════════════════
    WHATSAPP STICKY  — official green, real WA logo, bouncing
@@ -3403,6 +3522,7 @@ function WA() {
 export default function MahaHome() {
   const [properties, setProperties] = useState([]);
   const [blogs, setBlogs] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
 
   useEffect(() => {
     fetch("/api/blogs")
@@ -3417,6 +3537,13 @@ export default function MahaHome() {
       .then((data) => setProperties(data))
       .catch((err) => console.error(err));
   }, []);
+
+  useEffect(() => {
+    fetch("/api/testimonials")
+      .then((res) => res.json())
+      .then((data) => setTestimonials(data))
+      .catch((err) => console.error(err));
+  }, []);
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: GCSS }} />
@@ -3429,12 +3556,12 @@ export default function MahaHome() {
         <Stats />
         <Locs />
         <WhyNashik />
-        <Testi />
+        <Testi testimonials={testimonials} />
         <Blogs blogs={blogs} />
         <CTA />
       </main>
       {/* Single footer */}
-      <Foot />
+      <Footer />
       {/* WhatsApp sticky — official logo */}
       <WA />
     </>

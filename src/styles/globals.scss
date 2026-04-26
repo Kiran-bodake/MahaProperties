@@ -1,26 +1,34 @@
 :root {
-  --font:         var(--font-dm, "DM Sans", sans-serif);
-  --brand:        #16a34a;
-  --brand-dark:   #14532d;
-  --brand-light:  #f0fdf4;
-  --brand-mid:    #22c55e;
-  --gold:         #f59e0b;
-  --gray-50:      #f9fafb;
-  --gray-100:     #f3f4f6;
-  --gray-200:     #e5e7eb;
-  --gray-300:     #d1d5db;
-  --gray-400:     #9ca3af;
-  --gray-500:     #6b7280;
-  --gray-600:     #4b5563;
-  --gray-700:     #374151;
-  --gray-800:     #1f2937;
-  --gray-900:     #111827;
-  --header-h:     72px;
+  --font: var(--font-dm, "DM Sans", sans-serif);
+  --brand: #16a34a;
+  --brand-dark: #14532d;
+  --brand-light: #f0fdf4;
+  --brand-mid: #22c55e;
+  --gold: #f59e0b;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --header-h: 72px;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html  { scroll-behavior: smooth; }
-body  {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
   font-family: var(--font);
   font-size: 15px;
   line-height: 1.6;
@@ -29,18 +37,41 @@ body  {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-h1,h2,h3,h4,h5,h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font);
   font-weight: 700;
   line-height: 1.2;
   color: var(--gray-900);
   letter-spacing: -0.02em;
 }
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-button { cursor: pointer; font-family: var(--font); border: none; background: none; }
-input, select, textarea { font-family: var(--font); font-size: inherit; }
-::selection { background: rgba(22,163,74,0.18); }
+a {
+  color: inherit;
+  text-decoration: none;
+}
+img {
+  max-width: 100%;
+  display: block;
+}
+button {
+  cursor: pointer;
+  font-family: var(--font);
+  border: none;
+  background: none;
+}
+input,
+select,
+textarea {
+  font-family: var(--font);
+  font-size: inherit;
+}
+::selection {
+  background: rgba(22, 163, 74, 0.18);
+}
 
 .container {
   width: 100%;
@@ -48,20 +79,91 @@ input, select, textarea { font-family: var(--font); font-size: inherit; }
   margin: 0 auto;
   padding: 0 20px;
 }
-@media (min-width: 768px) { .container { padding: 0 32px; } }
-@media (min-width: 1280px) { .container { padding: 0 40px; } }
+@media (min-width: 768px) {
+  .container {
+    padding: 0 32px;
+  }
+}
+@media (min-width: 1280px) {
+  .container {
+    padding: 0 40px;
+  }
+}
 
-@keyframes fadeUp   { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
-@keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
-@keyframes shimmer  { 0% { background-position:-600px 0; } 100% { background-position:600px 0; } }
-@keyframes float    { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
-@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-@keyframes slideRight { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
-.fade-up  { animation: fadeUp 0.55s ease both; }
-.fade-in  { animation: fadeIn 0.4s ease both; }
-.d1 { animation-delay: 0.08s; }
-.d2 { animation-delay: 0.16s; }
-.d3 { animation-delay: 0.24s; }
-.d4 { animation-delay: 0.32s; }
-.d5 { animation-delay: 0.40s; }
+.fade-up {
+  animation: fadeUp 0.55s ease both;
+}
+.fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+.d1 {
+  animation-delay: 0.08s;
+}
+.d2 {
+  animation-delay: 0.16s;
+}
+.d3 {
+  animation-delay: 0.24s;
+}
+.d4 {
+  animation-delay: 0.32s;
+}
+.d5 {
+  animation-delay: 0.4s;
+}

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
 import PropertyImageSlider from "@/components/property/PropertyImageSlider";
 import ContactPopup from "@/components/property/ContactPopup";
+import { Footer } from "@/components/layout/footer";
 
 type Property = {
   id?: string;
@@ -55,7 +56,7 @@ async function getProperties(params: {
     }/api/properties?${qs.toString()}`,
     {
       cache: "no-store",
-    }
+    },
   );
 
   if (!res.ok) {
@@ -86,9 +87,7 @@ export default function PropertiesPage() {
           sortBy,
         });
 
-        const result = Array.isArray(data)
-          ? data
-          : data.properties || [];
+        const result = Array.isArray(data) ? data : data.properties || [];
 
         setProperties(result);
       } catch (error) {
@@ -104,45 +103,31 @@ export default function PropertiesPage() {
     <>
       <MegaNavbar />
 
-      <ContactPopup
-        open={showPopup}
-        onClose={() => setShowPopup(false)}
-      />
+      <ContactPopup open={showPopup} onClose={() => setShowPopup(false)} />
 
       <main className="page">
         <div className="container">
-
           <section className="hero">
-            <h1>
-              Discover Premium Properties in Nashik
-            </h1>
+            <h1>Discover Premium Properties in Nashik</h1>
 
             <p>
-              Explore verified NA plots,
-              commercial properties,
-              warehouses, industrial spaces and
-              investment opportunities with
-              trusted pricing and premium
-              locations.
+              Explore verified NA plots, commercial properties, warehouses,
+              industrial spaces and investment opportunities with trusted
+              pricing and premium locations.
             </p>
           </section>
 
           <section className="layout">
-
             {/* 99ACRES STYLE FILTER */}
 
             <aside className="sidebar">
-
               <div className="filterHeader">
                 <h3>Filters</h3>
 
-                <span>
-                  {properties.length} Results
-                </span>
+                <span>{properties.length} Results</span>
               </div>
 
               <form method="GET">
-
                 <div className="filterGroup">
                   <label>Search</label>
 
@@ -163,33 +148,19 @@ export default function PropertiesPage() {
                     defaultValue={category}
                     className="input"
                   >
-                    <option value="">
-                      All Categories
-                    </option>
+                    <option value="">All Categories</option>
 
-                    <option value="NA Plot">
-                      NA Plot
-                    </option>
+                    <option value="NA Plot">NA Plot</option>
 
-                    <option value="Agriculture Land">
-                      Agriculture Land
-                    </option>
+                    <option value="Agriculture Land">Agriculture Land</option>
 
-                    <option value="Commercial">
-                      Commercial
-                    </option>
+                    <option value="Commercial">Commercial</option>
 
-                    <option value="Industrial Shed">
-                      Industrial Shed
-                    </option>
+                    <option value="Industrial Shed">Industrial Shed</option>
 
-                    <option value="Warehouse">
-                      Warehouse
-                    </option>
+                    <option value="Warehouse">Warehouse</option>
 
-                    <option value="Investment Plot">
-                      Investment Plot
-                    </option>
+                    <option value="Investment Plot">Investment Plot</option>
                   </select>
                 </div>
 
@@ -208,199 +179,110 @@ export default function PropertiesPage() {
                 <div className="filterGroup">
                   <label>Sort By</label>
 
-                  <select
-                    name="sortBy"
-                    defaultValue={sortBy}
-                    className="input"
-                  >
-                    <option value="newest">
-                      Newest First
-                    </option>
+                  <select name="sortBy" defaultValue={sortBy} className="input">
+                    <option value="newest">Newest First</option>
 
-                    <option value="price_asc">
-                      Price Low → High
-                    </option>
+                    <option value="price_asc">Price Low → High</option>
 
-                    <option value="price_desc">
-                      Price High → Low
-                    </option>
+                    <option value="price_desc">Price High → Low</option>
 
-                    <option value="popular">
-                      Most Popular
-                    </option>
+                    <option value="popular">Most Popular</option>
                   </select>
                 </div>
 
                 <div className="chipWrap">
-
-                  <button
-                    type="button"
-                    className="chip"
-                  >
+                  <button type="button" className="chip">
                     Verified
                   </button>
 
-                  <button
-                    type="button"
-                    className="chip"
-                  >
+                  <button type="button" className="chip">
                     Premium
                   </button>
 
-                  <button
-                    type="button"
-                    className="chip"
-                  >
+                  <button type="button" className="chip">
                     Ready To Move
                   </button>
-
                 </div>
 
-                <button
-                  type="submit"
-                  className="filterBtn"
-                >
+                <button type="submit" className="filterBtn">
                   Apply Filters
                 </button>
-
               </form>
-
             </aside>
 
             {/* RIGHT */}
 
             <div className="content">
-
               <div className="topbar">
-
                 <div>
-                  <span className="topLabel">
-                    PROPERTY RESULTS
-                  </span>
+                  <span className="topLabel">PROPERTY RESULTS</span>
 
-                  <h2>
-                    {properties.length} Properties Available
-                  </h2>
+                  <h2>{properties.length} Properties Available</h2>
                 </div>
 
-                <p>
-                  Verified listings updated daily
-                </p>
-
+                <p>Verified listings updated daily</p>
               </div>
 
               <div className="list">
-
                 {properties.map((p) => {
                   const images =
-                    p.images &&
-                    p.images.length > 0
-                      ? p.images
-                      : [p.img];
+                    p.images && p.images.length > 0 ? p.images : [p.img];
 
                   return (
                     <Link
-                      key={
-                        p.id ||
-                        p._id ||
-                        p.slug
-                      }
+                      key={p.id || p._id || p.slug}
                       href={`/properties/${p.slug}`}
                       className="cardLink"
                     >
                       <article className="card">
-
                         <div className="imageWrap">
-
                           <PropertyImageSlider
-                            title={
-                              p.title ||
-                              p.t ||
-                              "Property"
-                            }
+                            title={p.title || p.t || "Property"}
                             images={
                               p.images?.length
                                 ? p.images
-                                : [
-                                    p.img,
-                                    p.img,
-                                    p.img,
-                                  ]
+                                : [p.img, p.img, p.img]
                             }
                           />
 
-                          <div className="verified">
-                            VERIFIED
-                          </div>
+                          <div className="verified">VERIFIED</div>
 
-                          {p.badge && (
-                            <div className="badge">
-                              {p.badge}
-                            </div>
-                          )}
+                          {p.badge && <div className="badge">{p.badge}</div>}
 
-                          <div className="photoCount">
-                            📸 {images.length}
-                          </div>
-
+                          <div className="photoCount">📸 {images.length}</div>
                         </div>
 
                         <div className="cardContent">
-
                           <div>
-
                             <div className="category">
-                              {p.category ||
-                                p.cat}
+                              {p.category || p.cat}
                             </div>
 
-                            <h3 className="title">
-                              {p.title || p.t}
-                            </h3>
+                            <h3 className="title">{p.title || p.t}</h3>
 
-                            <p className="location">
-                              📍{" "}
-                              {p.locality ||
-                                p.loc}
-                            </p>
+                            <p className="location">📍 {p.locality || p.loc}</p>
 
                             <div className="features">
-
-                              <div className="feature">
-                                📐 {p.area}
-                              </div>
+                              <div className="feature">📐 {p.area}</div>
 
                               <div className="feature">
                                 👁 {p.views || 0} views
                               </div>
 
                               {p.rera && (
-                                <div className="rera">
-                                  RERA Approved
-                                </div>
+                                <div className="rera">RERA Approved</div>
                               )}
-
                             </div>
-
                           </div>
 
                           <div className="footer">
-
                             <div>
+                              <div className="price">{p.price || p.pr}</div>
 
-                              <div className="price">
-                                {p.price ||
-                                  p.pr}
-                              </div>
-
-                              <span className="neg">
-                                Negotiable
-                              </span>
-
+                              <span className="neg">Negotiable</span>
                             </div>
 
                             <div className="btns">
-
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -412,40 +294,26 @@ export default function PropertiesPage() {
                                 Contact
                               </button>
 
-                              <button
-                                type="button"
-                                className="primaryBtn"
-                              >
+                              <button type="button" className="primaryBtn">
                                 View Details
                               </button>
-
                             </div>
-
                           </div>
-
                         </div>
-
                       </article>
                     </Link>
                   );
                 })}
-
               </div>
 
               {properties.length === 0 && (
-                <div className="empty">
-                  No matching properties found.
-                </div>
+                <div className="empty">No matching properties found.</div>
               )}
-
             </div>
-
           </section>
-
         </div>
 
         <style jsx>{`
-
           .page {
             background: #f8fafc;
             min-height: 100vh;
@@ -458,12 +326,7 @@ export default function PropertiesPage() {
           }
 
           .hero {
-            background: linear-gradient(
-              135deg,
-              #052e16,
-              #166534,
-              #22c55e
-            );
+            background: linear-gradient(135deg, #052e16, #166534, #22c55e);
 
             border-radius: 28px;
             padding: 40px;
@@ -473,11 +336,7 @@ export default function PropertiesPage() {
 
           .hero h1 {
             margin: 0;
-            font-size: clamp(
-              2rem,
-              6vw,
-              3.5rem
-            );
+            font-size: clamp(2rem, 6vw, 3.5rem);
 
             font-weight: 900;
           }
@@ -512,8 +371,7 @@ export default function PropertiesPage() {
 
             height: fit-content;
 
-            box-shadow:
-              0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
           }
 
           .filterHeader {
@@ -586,8 +444,7 @@ export default function PropertiesPage() {
 
             background: white;
 
-            box-shadow:
-              0 0 0 4px rgba(34,197,94,0.15);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
           }
 
           .chipWrap {
@@ -630,11 +487,7 @@ export default function PropertiesPage() {
 
             border-radius: 16px;
 
-            background: linear-gradient(
-              135deg,
-              #16a34a,
-              #22c55e
-            );
+            background: linear-gradient(135deg, #16a34a, #22c55e);
 
             color: white;
 
@@ -763,7 +616,7 @@ export default function PropertiesPage() {
             bottom: 14px;
             right: 14px;
 
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
 
             color: white;
 
@@ -932,7 +785,6 @@ export default function PropertiesPage() {
           }
 
           @media (max-width: 1024px) {
-
             .layout {
               grid-template-columns: 1fr;
             }
@@ -941,11 +793,9 @@ export default function PropertiesPage() {
               position: relative;
               top: 0;
             }
-
           }
 
           @media (max-width: 768px) {
-
             .card {
               grid-template-columns: 1fr;
             }
@@ -963,12 +813,10 @@ export default function PropertiesPage() {
             .secondaryBtn {
               width: 100%;
             }
-
           }
-
         `}</style>
-
       </main>
+      <Footer />
     </>
   );
 }

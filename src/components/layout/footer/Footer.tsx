@@ -203,7 +203,7 @@ export function Footer() {
               >
                 {col.ll.map(([l, h]) => (
                   <li key={l}>
-                    <a
+                    <Link
                       href={h}
                       style={lk}
                       onMouseEnter={(e) =>
@@ -214,7 +214,7 @@ export function Footer() {
                       }
                     >
                       {l}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

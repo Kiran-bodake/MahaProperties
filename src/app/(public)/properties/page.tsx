@@ -116,6 +116,8 @@ async function fetchAllProperties(signal?: AbortSignal): Promise<Property[]> {
 export default function PropertiesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const type = searchParams.get("type");
+  const location = searchParams.get("location");
 
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +132,16 @@ export default function PropertiesPage() {
     locality: searchParams.get("locality") || "",
     sortBy: (searchParams.get("sortBy") as SortKey) || "newest",
   });
+
+  useEffect(() => {
+    if (type || location) {
+      setFilters((prev) => ({
+        ...prev,
+        category: type || prev.category,
+        locality: location || prev.locality,
+      }));
+    }
+  }, [type, location]);
 
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showCatDropdown, setShowCatDropdown] = useState(false);
@@ -163,12 +175,20 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     const qs = new URLSearchParams();
+
     Object.entries(debouncedFilters).forEach(([k, v]) => {
-      if (v && !(k === "sortBy" && v === "newest")) qs.append(k, String(v));
+      if (v && !(k === "sortBy" && v === "newest")) {
+        qs.append(k, String(v));
+      }
     });
+
+    // ✅ preserve type & location
+    if (type) qs.set("type", type);
+    if (location) qs.set("location", location);
+
     const next = qs.toString();
     router.replace(next ? `?${next}` : "?", { scroll: false });
-  }, [debouncedFilters, router]);
+  }, [debouncedFilters, router, type, location]);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {

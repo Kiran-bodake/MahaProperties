@@ -2926,7 +2926,7 @@ function Blogs({ blogs }: any) {
           </div>
 
           <Link
-            href="/blog"
+            href="/blogs"
             className="b bo"
             style={{ padding: "8px 16px", fontSize: "12.5px" }}
           >
@@ -2943,7 +2943,7 @@ function Blogs({ blogs }: any) {
         >
           {/* Main Blog */}
           <Link
-            href={`/blog/${main.s}`}
+            href={`/blogs/${main.s}`}
             className="lf zm"
             style={{
               background: "white",
@@ -3001,7 +3001,7 @@ function Blogs({ blogs }: any) {
             {rest.map((b: any, i: number) => (
               <Link
                 key={b.s}
-                href={`/blog/${b.s}`}
+                href={`/blogs/${b.s}`}
                 className="lf"
                 style={{
                   background: "white",

@@ -249,7 +249,7 @@ export function Footer() {
               marginRight: "70px",
             }}
           >
-            Developed by G.K. Digital
+            Developed By Better Work
           </span>
         </div>
         {/* <div style={{ marginTop:"16px", textAlign:"center" }}>

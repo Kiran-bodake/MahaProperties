@@ -1,3 +1,4 @@
+
 "use client";
 // src/app/(public)/properties/page.tsx
 
@@ -50,6 +51,13 @@ type Filters = {
 /* ------------------------------------------------------------------ */
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+const SORT_LABELS: Record<SortKey, string> = {
+  newest: "Newest First",
+  price_asc: "Price Low → High",
+  price_desc: "Price High → Low",
+  popular: "Most Popular",
+};
 
 function useDebounced<T>(value: T, delay = 250): T {
   const [debounced, setDebounced] = useState(value);
@@ -182,7 +190,6 @@ export default function PropertiesPage() {
       }
     });
 
-    // ✅ preserve type & location
     if (type) qs.set("type", type);
     if (location) qs.set("location", location);
 
@@ -336,6 +343,47 @@ export default function PropertiesPage() {
     Number(!!filters.locality) +
     Number(filters.sortBy !== "newest");
 
+  /* ---------- Applied filter chips list ---------- */
+  const appliedChips: Array<{
+    key: keyof Filters;
+    label: string;
+    value: string;
+    icon: string;
+  }> = [];
+  if (filters.q)
+    appliedChips.push({
+      key: "q",
+      label: "Search",
+      value: filters.q,
+      icon: "🔍",
+    });
+  if (filters.category)
+    appliedChips.push({
+      key: "category",
+      label: "Type",
+      value: filters.category,
+      icon: "🏷️",
+    });
+  if (filters.locality)
+    appliedChips.push({
+      key: "locality",
+      label: "Location",
+      value: filters.locality,
+      icon: "📍",
+    });
+  if (filters.sortBy !== "newest")
+    appliedChips.push({
+      key: "sortBy",
+      label: "Sort",
+      value: SORT_LABELS[filters.sortBy],
+      icon: "↕️",
+    });
+
+  const clearChip = (key: keyof Filters) => {
+    if (key === "sortBy") setF("sortBy", "newest");
+    else setF(key, "");
+  };
+
   /* ================================================================ */
   /*  Render                                                           */
   /* ================================================================ */
@@ -349,12 +397,49 @@ export default function PropertiesPage() {
         <div className="container">
           {/* HERO */}
           <section className="hero">
-            <h1>Discover Premium Properties in Nashik</h1>
+            <h1>Find Premium Properties in Nashik</h1>
             <p>
               Explore verified NA plots, commercial properties, warehouses and
               investment opportunities in prime locations.
             </p>
           </section>
+
+          {/* ===== APPLIED FILTERS BAR (TOP) ===== */}
+          {appliedChips.length > 0 && (
+            <section className="appliedBar" aria-label="Applied filters">
+              <div className="appliedLeft">
+                <span className="appliedTitle">
+                  <span className="appliedDot" />
+                  Applied Filters
+                  <span className="appliedCount">{appliedChips.length}</span>
+                </span>
+                <div className="chips">
+                  {appliedChips.map((chip) => (
+                    <span key={chip.key} className="chip">
+                      <span className="chipIcon">{chip.icon}</span>
+                      <span className="chipLabel">{chip.label}:</span>
+                      <span className="chipValue">{chip.value}</span>
+                      <button
+                        type="button"
+                        className="chipClose"
+                        aria-label={`Remove ${chip.label} filter`}
+                        onClick={() => clearChip(chip.key)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="clearAllBtn"
+                onClick={resetFilters}
+              >
+                Clear All
+              </button>
+            </section>
+          )}
 
           <section className="layout">
             {/* ============ FIXED FILTER SIDEBAR ============ */}
@@ -365,7 +450,7 @@ export default function PropertiesPage() {
               <div className="sidebarInner">
                 <div className="filterHeader">
                   <h3>
-                    <span className="filterIcon">🔍</span>
+                    <span className="filterIcon"></span>
                     Filters
                     {activeFiltersCount > 0 && (
                       <span className="activeDot">{activeFiltersCount}</span>
@@ -674,7 +759,7 @@ export default function PropertiesPage() {
           .container {
             width: min(1400px, 94%);
             margin: auto;
-            padding-left: 320px; /* reserve space for fixed sidebar (hero + layout both shift) */
+            padding-left: 320px;
           }
 
           .hero {
@@ -695,15 +780,163 @@ export default function PropertiesPage() {
             line-height: 1.5;
           }
 
+          /* ===== APPLIED FILTERS BAR ===== */
+          .appliedBar {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            animation: slideDown 0.3s ease;
+          }
+          @keyframes slideDown {
+            from {
+              opacity: 0;
+              transform: translateY(-6px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .appliedLeft {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            flex: 1;
+            min-width: 0;
+          }
+          .appliedTitle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #14532d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+          }
+          .appliedDot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #16a34a;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+          }
+          .appliedCount {
+            background: #16a34a;
+            color: white;
+            font-size: 11px;
+            min-width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 0 6px;
+          }
+          .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+          .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 6px 6px 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            max-width: 100%;
+            transition:
+              background 0.15s ease,
+              border-color 0.15s ease;
+          }
+          .chip:hover {
+            background: #dcfce7;
+            border-color: #86efac;
+          }
+          .chipIcon {
+            font-size: 13px;
+          }
+          .chipLabel {
+            color: #059669;
+            font-weight: 700;
+            font-size: 12px;
+          }
+          .chipValue {
+            color: #111827;
+            font-weight: 600;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .chipClose {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(22, 163, 74, 0.15);
+            color: #14532d;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition:
+              background 0.15s ease,
+              color 0.15s ease,
+              transform 0.15s ease;
+          }
+          .chipClose:hover {
+            background: #16a34a;
+            color: white;
+            transform: rotate(90deg);
+          }
+          .clearAllBtn {
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid #fca5a5;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition:
+              background 0.15s ease,
+              color 0.15s ease;
+          }
+          .clearAllBtn:hover {
+            background: #b91c1c;
+            color: white;
+            border-color: #b91c1c;
+          }
+
           .layout {
             position: relative;
             display: block;
           }
 
-          /* ===== FIXED SIDEBAR (does NOT move with page scroll) ===== */
+          /* ===== FIXED SIDEBAR ===== */
           .sidebar {
             position: fixed;
-            top: 220px; /* clears navbar + filter pills */
+            top: 220px;
             left: max(calc((100vw - min(1400px, 94vw)) / 2), 16px);
             width: 300px;
             height: calc(100vh - 240px);
@@ -966,7 +1199,6 @@ export default function PropertiesPage() {
             }
           }
 
-          /* ===== RIGHT CONTENT (this is what scrolls) ===== */
           .content {
             min-height: 100vh;
           }
@@ -1188,6 +1420,13 @@ export default function PropertiesPage() {
             .primaryBtn,
             .secondaryBtn {
               width: 100%;
+            }
+            .appliedBar {
+              flex-direction: column;
+              align-items: stretch;
+            }
+            .clearAllBtn {
+              align-self: flex-end;
             }
           }
         `}</style>

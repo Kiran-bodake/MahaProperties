@@ -142,7 +142,7 @@ export function Footer() {
                 </span>
               </div>
             </div>
-            <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
+            {/* <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
               {[Instagram, Facebook, Youtube, Twitter].map((Icon, i) => (
                 <a
                   key={i}
@@ -177,7 +177,7 @@ export function Footer() {
                   <Icon size={15} />
                 </a>
               ))}
-            </div>
+            </div> */}
           </div>
           {FCOLS.map((col) => (
             <div key={col.t}>

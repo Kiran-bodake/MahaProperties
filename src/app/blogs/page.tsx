@@ -6,6 +6,7 @@ import {
   Navbar,
 } from "@/components/layout/navbar/Navbar";
 import Link from "next/link";
+import { Footer } from "@/components/layout/footer";
 
 type Blog = {
   s: string;
@@ -90,7 +91,7 @@ export default function BlogsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px,1fr))",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: "28px",
               }}
             >
@@ -201,6 +202,7 @@ export default function BlogsPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

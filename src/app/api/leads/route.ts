@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+/*/import { NextRequest, NextResponse } from "next/server";
 import { setupDatabase } from "@/lib/db-init";
 import Lead from "@/models/Lead";
 import { requireAdminUser } from "@/lib/admin-auth";
@@ -22,4 +22,37 @@ export async function GET(req: NextRequest) {
   await seedLeads();
   const leads = await Lead.find().sort({ createdAt: -1 }).lean();
   return NextResponse.json({ leads });
+}*/import { NextResponse } from "next/server";
+
+import connectDB from "@/lib/mongodb";
+import Lead from "@/models/Lead";
+
+export async function POST(req: Request) {
+  try {
+    await connectDB();
+
+    const body = await req.json();
+
+    const lead = await Lead.create({
+      name: body.name,
+      phone: body.phone,
+      email: body.email,
+      interest: body.interest,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: lead,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to save lead",
+      },
+      { status: 500 }
+    );
+  }
 }

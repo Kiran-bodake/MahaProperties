@@ -33,6 +33,12 @@ export default function ContactPopup({ open, onClose }: Props) {
   const [selected, setSelected] = useState("Buy");
   const [activeSlide, setActiveSlide] = useState(0);
 
+  // FORM STATES
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const goNext = useCallback(() => {
     setActiveSlide((p) => (p === showcaseSlides.length - 1 ? 0 : p + 1));
   }, []);
@@ -41,9 +47,65 @@ export default function ContactPopup({ open, onClose }: Props) {
     setActiveSlide((p) => (p === 0 ? showcaseSlides.length - 1 : p - 1));
   }, []);
 
+  // SAVE DATA TO MONGODB
+  const handleSubmit = async () => {
+    if (!name || !phone || !email) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    // remove non-numeric characters
+    const cleanPhone = phone.replace(/\D/g, "");
+
+    // validate 10 digit mobile number
+    if (cleanPhone.length !== 10) {
+      alert("Invalid mobile number. Please enter 10 digits.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          phone: cleanPhone,
+          email,
+          interest: selected,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Information saved successfully");
+
+        setName("");
+        setPhone("");
+        setEmail("");
+        setSelected("Buy");
+
+        onClose();
+      } else {
+        alert("Failed to save information");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!open) return;
+
     const timer = setInterval(goNext, 3500);
+
     return () => clearInterval(timer);
   }, [open, goNext]);
 
@@ -54,7 +116,11 @@ export default function ContactPopup({ open, onClose }: Props) {
       <div className="overlay" onClick={onClose}>
         <div className="popup" onClick={(e) => e.stopPropagation()}>
           {/* CLOSE BUTTON */}
-          <button onClick={onClose} className="closeBtn" aria-label="Close Popup">
+          <button
+            onClick={onClose}
+            className="closeBtn"
+            aria-label="Close Popup"
+          >
             ×
           </button>
 
@@ -67,7 +133,6 @@ export default function ContactPopup({ open, onClose }: Props) {
                   className={`slide ${activeSlide === index ? "active" : ""}`}
                   style={{ backgroundImage: `url(${slide.image})` }}
                 >
-                  {/* Strong gradient overlay for text contrast */}
                   <div className="slideOverlay" />
 
                   <div className="slideContent">
@@ -76,43 +141,23 @@ export default function ContactPopup({ open, onClose }: Props) {
                     <h2 className="slideTitle">{slide.title}</h2>
 
                     <p className="slideDesc">{slide.desc}</p>
-
-                    <div className="featureScroller">
-                      <div className="featureCard">
-                        <span>✅</span>
-                        <p>Verified Listings</p>
-                      </div>
-                      <div className="featureCard">
-                        <span>📍</span>
-                        <p>Prime Locations</p>
-                      </div>
-                      <div className="featureCard">
-                        <span>💰</span>
-                        <p>Best Deals</p>
-                      </div>
-                      <div className="featureCard">
-                        <span>🏢</span>
-                        <p>Premium Projects</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ))}
 
-              {/* MANUAL ARROWS */}
+              {/* ARROWS */}
               <button
                 type="button"
                 className="navArrow navArrow--left"
                 onClick={goPrev}
-                aria-label="Previous slide"
               >
                 ‹
               </button>
+
               <button
                 type="button"
                 className="navArrow navArrow--right"
                 onClick={goNext}
-                aria-label="Next slide"
               >
                 ›
               </button>
@@ -122,9 +167,10 @@ export default function ContactPopup({ open, onClose }: Props) {
                 {showcaseSlides.map((_, index) => (
                   <button
                     key={index}
-                    className={`dot ${activeSlide === index ? "activeDot" : ""}`}
+                    className={`dot ${
+                      activeSlide === index ? "activeDot" : ""
+                    }`}
                     onClick={() => setActiveSlide(index)}
-                    aria-label={`Go to slide ${index + 1}`}
                   />
                 ))}
               </div>
@@ -135,21 +181,26 @@ export default function ContactPopup({ open, onClose }: Props) {
           <div className="rightPanel">
             <div className="header">
               <h2>Contact Property Owner</h2>
+
               <p>
                 Get pricing details, brochures, site visit support and expert
                 consultation instantly.
               </p>
             </div>
 
+            {/* INTEREST */}
             <div className="section">
               <label className="label">I am interested in</label>
+
               <div className="radioWrap">
                 {["Buy", "Rent", "Investment"].map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setSelected(item)}
-                    className={selected === item ? "pillBtn active" : "pillBtn"}
+                    className={
+                      selected === item ? "pillBtn active" : "pillBtn"
+                    }
                   >
                     {item}
                   </button>
@@ -157,10 +208,33 @@ export default function ContactPopup({ open, onClose }: Props) {
               </div>
             </div>
 
+            {/* FORM */}
             <div className="form">
-              <input type="text" placeholder="Your Name" className="input" />
-              <input type="tel" placeholder="Phone Number" className="input" />
-              <input type="email" placeholder="Email Address" className="input" />
+              <input
+                type="text"
+                placeholder="Your Name"
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                className="input"
+                value={phone}
+                maxLength={10}
+                pattern="[0-9]{10}"
+                onChange={(e) => setPhone(e.target.value)}
+              />
+
+              <input
+                type="email"
+                placeholder="Email Address"
+                className="input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
 
             <label className="checkWrap">
@@ -168,7 +242,14 @@ export default function ContactPopup({ open, onClose }: Props) {
               <span>Get instant updates on WhatsApp</span>
             </label>
 
-            <button className="submitBtn">Get Contact Details</button>
+            {/* SUBMIT */}
+            <button
+              className="submitBtn"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Get Contact Details"}
+            </button>
 
             <div className="trustInfo">
               🔒 Your information is safe & secure with MahaProperty
@@ -189,6 +270,7 @@ export default function ContactPopup({ open, onClose }: Props) {
           z-index: 9999;
           backdrop-filter: blur(10px);
         }
+
         .popup {
           width: 100%;
           max-width: 1100px;
@@ -199,15 +281,8 @@ export default function ContactPopup({ open, onClose }: Props) {
           display: grid;
           grid-template-columns: 1fr 1fr;
           position: relative;
-          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-          animation: popup 0.25s ease;
-        }
-        @keyframes popup {
-          from { opacity: 0; transform: scale(0.96) translateY(10px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* CLOSE BUTTON */
         .closeBtn {
           position: absolute;
           top: 18px;
@@ -215,34 +290,25 @@ export default function ContactPopup({ open, onClose }: Props) {
           width: 46px;
           height: 46px;
           border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          background: rgba(0, 0, 0, 0.75);
-          color: #ffffff;
-          font-size: 30px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          border: none;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          font-size: 28px;
           cursor: pointer;
-          z-index: 999;
-          transition: 0.25s ease;
-        }
-        .closeBtn:hover {
-          background: #16a34a;
-          transform: scale(1.05);
+          z-index: 10;
         }
 
-        /* LEFT PANEL */
         .leftPanel {
           position: relative;
           overflow: hidden;
-          height: 100%;
         }
+
         .slider {
           width: 100%;
           height: 100%;
           position: relative;
         }
+
         .slide {
           position: absolute;
           inset: 0;
@@ -250,135 +316,67 @@ export default function ContactPopup({ open, onClose }: Props) {
           transition: opacity 0.5s ease;
           background-size: cover;
           background-position: center;
+          padding: 30px;
           display: flex;
           align-items: flex-end;
-          padding: 32px;
         }
-        .slide.active { opacity: 1; }
 
-        /* STRONG dark gradient overlay for text contrast */
+        .slide.active {
+          opacity: 1;
+        }
+
         .slideOverlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.15) 0%,
-            rgba(0, 0, 0, 0.35) 40%,
-            rgba(0, 0, 0, 0.85) 100%
-          );
-          z-index: 1;
+          background: rgba(0, 0, 0, 0.5);
         }
 
         .slideContent {
           position: relative;
           z-index: 2;
-          width: 100%;
-          max-width: 480px;
           color: white;
         }
 
-        /* BADGE */
-        .brandBadge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 16px;
-          border-radius: 999px;
-          background: linear-gradient(135deg, #16a34a, #22c55e);
-          color: white;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 0.12em;
-          box-shadow: 0 6px 18px rgba(22, 163, 74, 0.45);
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-        }
-
-        /* TITLE — high contrast, clear, attractive */
         .slideTitle {
-          margin-top: 18px;
-          margin-bottom: 12px;
-          font-size: 2.25rem;
-          line-height: 1.1;
+          font-size: 2rem;
           font-weight: 900;
-          letter-spacing: -0.02em;
-          color: #ffffff;
-          text-shadow:
-            0 2px 8px rgba(0, 0, 0, 0.7),
-            0 1px 2px rgba(0, 0, 0, 0.9);
         }
 
-        /* DESCRIPTION */
         .slideDesc {
-          font-size: 14.5px;
-          line-height: 1.6;
-          color: #f1f5f9;
-          font-weight: 500;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-          margin: 0;
+          margin-top: 10px;
         }
 
-        /* FEATURES */
-        .featureScroller {
-          margin-top: 20px;
-          display: flex;
-          gap: 12px;
-          overflow-x: auto;
-          scrollbar-width: none;
-        }
-        .featureScroller::-webkit-scrollbar { display: none; }
-        .featureCard {
-          min-width: 150px;
-          background: rgba(255, 255, 255, 0.18);
-          border: 1px solid rgba(255, 255, 255, 0.25);
-          backdrop-filter: blur(12px);
-          border-radius: 18px;
-          padding: 14px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-shrink: 0;
-        }
-        .featureCard p {
-          margin: 0;
+        .brandBadge {
+          background: #16a34a;
+          padding: 8px 14px;
+          border-radius: 999px;
           font-size: 12px;
-          font-weight: 800;
-          color: white;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+          font-weight: 700;
         }
 
-        /* === MANUAL NAVIGATION ARROWS === */
         .navArrow {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          width: 48px;
-          height: 48px;
+          width: 42px;
+          height: 42px;
           border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.6);
-          background: rgba(0, 0, 0, 0.55);
-          backdrop-filter: blur(8px);
+          border: none;
+          background: rgba(0, 0, 0, 0.6);
           color: white;
-          font-size: 32px;
-          font-weight: 700;
-          line-height: 1;
+          font-size: 24px;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 15;
-          transition: all 0.25s ease;
-          padding: 0 0 4px 0;
+          z-index: 10;
         }
-        .navArrow:hover {
-          background: #16a34a;
-          border-color: white;
-          transform: translateY(-50%) scale(1.1);
-          box-shadow: 0 8px 22px rgba(22, 163, 74, 0.5);
-        }
-        .navArrow--left { left: 16px; }
-        .navArrow--right { right: 16px; }
 
-        /* DOTS */
+        .navArrow--left {
+          left: 10px;
+        }
+
+        .navArrow--right {
+          right: 10px;
+        }
+
         .dots {
           position: absolute;
           bottom: 18px;
@@ -386,75 +384,71 @@ export default function ContactPopup({ open, onClose }: Props) {
           transform: translateX(-50%);
           display: flex;
           gap: 8px;
-          z-index: 10;
         }
+
         .dot {
           width: 10px;
           height: 10px;
-          border-radius: 999px;
+          border-radius: 50%;
           border: none;
           background: rgba(255, 255, 255, 0.5);
-          cursor: pointer;
-          transition: 0.2s ease;
-        }
-        .dot:hover { background: rgba(255, 255, 255, 0.8); }
-        .activeDot {
-          background: #22c55e;
-          width: 26px;
         }
 
-        /* RIGHT PANEL */
+        .activeDot {
+          background: #22c55e;
+        }
+
         .rightPanel {
           padding: 30px;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          overflow: hidden;
         }
+
         .header h2 {
-          margin: 0;
           font-size: 2rem;
-          font-weight: 900;
-          color: #111827;
+          margin: 0;
         }
+
         .header p {
-          margin-top: 10px;
           color: #64748b;
-          line-height: 1.6;
-          font-size: 14px;
+          margin-top: 10px;
         }
-        .section { margin-top: 20px; }
+
+        .section {
+          margin-top: 20px;
+        }
+
         .label {
-          display: block;
-          margin-bottom: 12px;
-          font-size: 13px;
           font-weight: 700;
-          color: #374151;
+          margin-bottom: 10px;
+          display: block;
         }
+
         .radioWrap {
           display: flex;
           gap: 10px;
-          flex-wrap: wrap;
         }
+
         .pillBtn {
           height: 42px;
           padding: 0 18px;
           border-radius: 999px;
           border: 1px solid #d1d5db;
           background: white;
-          font-size: 13px;
-          font-weight: 700;
           cursor: pointer;
-          transition: 0.2s ease;
-          color: #111827;
         }
-        .pillBtn:hover { border-color: #16a34a; }
+
         .pillBtn.active {
           background: #16a34a;
-          border-color: #16a34a;
           color: white;
+          border-color: #16a34a;
         }
-        .form { margin-top: 20px; }
+
+        .form {
+          margin-top: 20px;
+        }
+
         .input {
           width: 100%;
           height: 52px;
@@ -462,90 +456,37 @@ export default function ContactPopup({ open, onClose }: Props) {
           border: 1px solid #d1d5db;
           padding: 0 16px;
           margin-bottom: 12px;
-          font-size: 14px;
-          outline: none;
-          transition: 0.2s ease;
-          color: #111827;
         }
-        .input:focus {
-          border-color: #16a34a;
-          box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
-        }
+
         .checkWrap {
           display: flex;
-          align-items: center;
           gap: 10px;
-          margin-top: 6px;
-          font-size: 13px;
-          color: #374151;
+          margin-top: 10px;
         }
-        .checkWrap input {
-          width: 18px;
-          height: 18px;
-          accent-color: #16a34a;
-        }
+
         .submitBtn {
           width: 100%;
           height: 54px;
-          margin-top: 18px;
+          margin-top: 20px;
           border: none;
-          border-radius: 16px;
-          background: linear-gradient(135deg, #16a34a, #22c55e);
+          border-radius: 14px;
+          background: #16a34a;
           color: white;
           font-size: 15px;
-          font-weight: 900;
+          font-weight: 700;
           cursor: pointer;
-          transition: 0.25s ease;
         }
-        .submitBtn:hover { transform: translateY(-1px); }
+
+        .submitBtn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
         .trustInfo {
-          margin-top: 14px;
+          margin-top: 12px;
           text-align: center;
-          font-size: 12px;
           color: #64748b;
-        }
-
-        /* TABLET */
-        @media (max-width: 900px) {
-          .popup {
-            grid-template-columns: 1fr;
-            height: 95vh;
-          }
-          .leftPanel { height: 38%; }
-          .rightPanel { height: 62%; overflow-y: auto; }
-          .navArrow { width: 40px; height: 40px; font-size: 26px; }
-          .slideTitle { font-size: 1.6rem; }
-        }
-
-        /* MOBILE */
-        @media (max-width: 768px) {
-          .overlay { padding: 0; }
-          .popup {
-            width: 100%;
-            height: 100vh;
-            border-radius: 0;
-          }
-          .leftPanel { height: 34%; }
-          .rightPanel { padding: 22px 18px; }
-          .slide { padding: 22px; }
-          .slideTitle { font-size: 1.4rem; }
-          .header h2 { font-size: 1.6rem; }
-          .closeBtn {
-            top: 14px;
-            right: 14px;
-            width: 44px;
-            height: 44px;
-            font-size: 28px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #ffffff;
-          }
-          .navArrow {
-            width: 36px;
-            height: 36px;
-            font-size: 22px;
-          }
-          .navArrow--left { left: 10px; }
-          .navArrow--right { right: 10px; }
+          font-size: 12px;
         }
       `}</style>
     </>

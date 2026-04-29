@@ -1,4 +1,3 @@
-
 "use client";
 // src/app/(public)/properties/page.tsx
 
@@ -9,12 +8,11 @@ import Link from "next/link";
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
 import PropertyImageSlider from "@/components/property/PropertyImageSlider";
 import ContactPopup from "@/components/property/ContactPopup";
+import { Footer } from "@/components/layout/footer";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
-import { Footer } from "@/components/layout/footer";
-
 type Property = {
   id?: string;
   _id?: string;
@@ -49,7 +47,6 @@ type Filters = {
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
-
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 const SORT_LABELS: Record<SortKey, string> = {
@@ -106,7 +103,6 @@ function getLocalityParts(p: Property): { locality: string; city: string } {
 /* ------------------------------------------------------------------ */
 /*  API                                                                */
 /* ------------------------------------------------------------------ */
-
 async function fetchAllProperties(signal?: AbortSignal): Promise<Property[]> {
   const res = await fetch(`${BASE_URL}/api/properties`, {
     cache: "no-store",
@@ -120,7 +116,6 @@ async function fetchAllProperties(signal?: AbortSignal): Promise<Property[]> {
 /* ================================================================== */
 /*  Page                                                               */
 /* ================================================================== */
-
 export default function PropertiesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -183,32 +178,23 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     const qs = new URLSearchParams();
-
     Object.entries(debouncedFilters).forEach(([k, v]) => {
       if (v && !(k === "sortBy" && v === "newest")) {
         qs.append(k, String(v));
       }
     });
-
     if (type) qs.set("type", type);
     if (location) qs.set("location", location);
-
     const next = qs.toString();
     router.replace(next ? `?${next}` : "?", { scroll: false });
   }, [debouncedFilters, router, type, location]);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (
-        cityWrapRef.current &&
-        !cityWrapRef.current.contains(e.target as Node)
-      ) {
+      if (cityWrapRef.current && !cityWrapRef.current.contains(e.target as Node)) {
         setShowCityDropdown(false);
       }
-      if (
-        catWrapRef.current &&
-        !catWrapRef.current.contains(e.target as Node)
-      ) {
+      if (catWrapRef.current && !catWrapRef.current.contains(e.target as Node)) {
         setShowCatDropdown(false);
       }
     }
@@ -343,7 +329,6 @@ export default function PropertiesPage() {
     Number(!!filters.locality) +
     Number(filters.sortBy !== "newest");
 
-  /* ---------- Applied filter chips list ---------- */
   const appliedChips: Array<{
     key: keyof Filters;
     label: string;
@@ -351,33 +336,13 @@ export default function PropertiesPage() {
     icon: string;
   }> = [];
   if (filters.q)
-    appliedChips.push({
-      key: "q",
-      label: "Search",
-      value: filters.q,
-      icon: "🔍",
-    });
+    appliedChips.push({ key: "q", label: "Search", value: filters.q, icon: "🔍" });
   if (filters.category)
-    appliedChips.push({
-      key: "category",
-      label: "Type",
-      value: filters.category,
-      icon: "🏷️",
-    });
+    appliedChips.push({ key: "category", label: "Type", value: filters.category, icon: "🏷️" });
   if (filters.locality)
-    appliedChips.push({
-      key: "locality",
-      label: "Location",
-      value: filters.locality,
-      icon: "📍",
-    });
+    appliedChips.push({ key: "locality", label: "Location", value: filters.locality, icon: "📍" });
   if (filters.sortBy !== "newest")
-    appliedChips.push({
-      key: "sortBy",
-      label: "Sort",
-      value: SORT_LABELS[filters.sortBy],
-      icon: "↕️",
-    });
+    appliedChips.push({ key: "sortBy", label: "Sort", value: SORT_LABELS[filters.sortBy], icon: "↕️" });
 
   const clearChip = (key: keyof Filters) => {
     if (key === "sortBy") setF("sortBy", "newest");
@@ -387,7 +352,6 @@ export default function PropertiesPage() {
   /* ================================================================ */
   /*  Render                                                           */
   /* ================================================================ */
-
   return (
     <>
       <MegaNavbar />
@@ -404,48 +368,9 @@ export default function PropertiesPage() {
             </p>
           </section>
 
-          {/* ===== APPLIED FILTERS BAR (TOP) ===== */}
-          {appliedChips.length > 0 && (
-            <section className="appliedBar" aria-label="Applied filters">
-              <div className="appliedLeft">
-                <span className="appliedTitle">
-                  <span className="appliedDot" />
-                  Applied Filters
-                  <span className="appliedCount">{appliedChips.length}</span>
-                </span>
-                <div className="chips">
-                  {appliedChips.map((chip) => (
-                    <span key={chip.key} className="chip">
-                      <span className="chipIcon">{chip.icon}</span>
-                      <span className="chipLabel">{chip.label}:</span>
-                      <span className="chipValue">{chip.value}</span>
-                      <button
-                        type="button"
-                        className="chipClose"
-                        aria-label={`Remove ${chip.label} filter`}
-                        onClick={() => clearChip(chip.key)}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <button
-                type="button"
-                className="clearAllBtn"
-                onClick={resetFilters}
-              >
-                Clear All
-              </button>
-            </section>
-          )}
-
           <section className="layout">
-            {/* ============ FIXED FILTER SIDEBAR ============ */}
-            <aside
-              className={`sidebar ${sidebarVisible ? "sidebar--visible" : ""}`}
-            >
+            {/* SIDEBAR — left */}
+            <aside className={`sidebar ${sidebarVisible ? "sidebar--visible" : ""}`}>
               <div className="glassOverlay" />
               <div className="sidebarInner">
                 <div className="filterHeader">
@@ -606,9 +531,7 @@ export default function PropertiesPage() {
                         id="f-sort"
                         className="input"
                         value={filters.sortBy}
-                        onChange={(e) =>
-                          setF("sortBy", e.target.value as SortKey)
-                        }
+                        onChange={(e) => setF("sortBy", e.target.value as SortKey)}
                       >
                         <option value="newest">Newest First</option>
                         <option value="price_asc">Price Low → High</option>
@@ -635,11 +558,7 @@ export default function PropertiesPage() {
                       {loading ? "Loading…" : "Apply Filters"}
                     </button>
                     {activeFiltersCount > 0 && (
-                      <button
-                        type="button"
-                        className="resetBtn"
-                        onClick={resetFilters}
-                      >
+                      <button type="button" className="resetBtn" onClick={resetFilters}>
                         Reset
                       </button>
                     )}
@@ -648,24 +567,56 @@ export default function PropertiesPage() {
               </div>
             </aside>
 
-            {/* ============ RIGHT CONTENT ============ */}
+            {/* RIGHT CONTENT — applied bar + topbar + cards सब यहाँ */}
             <div className="content">
+              {/* ✅ APPLIED FILTERS BAR — अब right column में */}
+              {appliedChips.length > 0 && (
+                <section className="appliedBar" aria-label="Applied filters">
+                  <div className="appliedLeft">
+                    <span className="appliedTitle">
+                      <span className="appliedDot" />
+                      Applied Filters
+                      <span className="appliedCount">{appliedChips.length}</span>
+                    </span>
+                    <div className="chips">
+                      {appliedChips.map((chip) => (
+                        <span key={chip.key} className="chip">
+                          <span className="chipIcon">{chip.icon}</span>
+                          <span className="chipLabel">{chip.label}:</span>
+                          <span className="chipValue">{chip.value}</span>
+                          <button
+                            type="button"
+                            className="chipClose"
+                            aria-label={`Remove ${chip.label} filter`}
+                            onClick={() => clearChip(chip.key)}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <button type="button" className="clearAllBtn" onClick={resetFilters}>
+                    Clear All
+                  </button>
+                </section>
+              )}
+
+              {/* TOPBAR */}
               <div className="topbar">
                 <div>
                   <span className="topLabel">PROPERTY RESULTS</span>
                   <h2>
-                    {loading
-                      ? "Loading…"
-                      : `${properties.length} Properties Available`}
+                    {loading ? "Loading…" : `${properties.length} Properties Available`}
                   </h2>
                 </div>
                 <p>Verified listings updated daily</p>
               </div>
 
+              {/* CARDS */}
               <div className="list">
                 {properties.map((p) => {
-                  const images =
-                    p.images && p.images.length > 0 ? p.images : [p.img];
+                  const images = p.images && p.images.length > 0 ? p.images : [p.img];
                   return (
                     <Link
                       key={p.id || p._id || p.slug}
@@ -676,11 +627,7 @@ export default function PropertiesPage() {
                         <div className="imageWrap">
                           <PropertyImageSlider
                             title={p.title || p.t || "Property"}
-                            images={
-                              p.images?.length
-                                ? p.images
-                                : [p.img, p.img, p.img]
-                            }
+                            images={p.images?.length ? p.images : [p.img, p.img, p.img]}
                           />
                           <div className="verified">VERIFIED</div>
                           {p.badge && <div className="badge">{p.badge}</div>}
@@ -688,19 +635,13 @@ export default function PropertiesPage() {
                         </div>
                         <div className="cardContent">
                           <div>
-                            <div className="category">
-                              {p.category || p.cat}
-                            </div>
+                            <div className="category">{p.category || p.cat}</div>
                             <h3 className="title">{p.title || p.t}</h3>
                             <p className="location">📍 {p.locality || p.loc}</p>
                             <div className="features">
                               <div className="feature">📐 {p.area}</div>
-                              <div className="feature">
-                                👁 {p.views || 0} views
-                              </div>
-                              {p.rera && (
-                                <div className="rera">RERA Approved</div>
-                              )}
+                              <div className="feature">👁 {p.views || 0} views</div>
+                              {p.rera && <div className="rera">RERA Approved</div>}
                             </div>
                           </div>
                           <div className="footer">
@@ -736,11 +677,7 @@ export default function PropertiesPage() {
                   <div className="emptyIcon">🏚️</div>
                   <h3>No matching properties found</h3>
                   <p>Try adjusting your filters or searching another city.</p>
-                  <button
-                    type="button"
-                    className="primaryBtn"
-                    onClick={resetFilters}
-                  >
+                  <button type="button" className="primaryBtn" onClick={resetFilters}>
                     Clear all filters
                   </button>
                 </div>
@@ -754,12 +691,11 @@ export default function PropertiesPage() {
           .page {
             background: #f0f4f8;
             min-height: 100vh;
-            padding: 90px 0 40px;
+            padding: 16px 0 40px;
           }
           .container {
             width: min(1400px, 94%);
             margin: auto;
-            padding-left: 320px;
           }
 
           .hero {
@@ -769,18 +705,10 @@ export default function PropertiesPage() {
             color: white;
             margin-bottom: 20px;
           }
-          .hero h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            font-weight: 800;
-          }
-          .hero p {
-            margin-top: 10px;
-            max-width: 700px;
-            line-height: 1.5;
-          }
+          .hero h1 { margin: 0; font-size: 2.2rem; font-weight: 800; }
+          .hero p { margin-top: 10px; max-width: 700px; line-height: 1.5; }
 
-          /* ===== APPLIED FILTERS BAR ===== */
+          /* APPLIED FILTERS BAR — अब right column में, cards के साथ aligned */
           .appliedBar {
             background: white;
             border: 1px solid #e5e7eb;
@@ -796,413 +724,25 @@ export default function PropertiesPage() {
             animation: slideDown 0.3s ease;
           }
           @keyframes slideDown {
-            from {
-              opacity: 0;
-              transform: translateY(-6px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
           }
-          .appliedLeft {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-            flex: 1;
-            min-width: 0;
-          }
-          .appliedTitle {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 800;
-            color: #14532d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-          }
-          .appliedDot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #16a34a;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
-          }
-          .appliedCount {
-            background: #16a34a;
-            color: white;
-            font-size: 11px;
-            min-width: 20px;
-            height: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            padding: 0 6px;
-          }
-          .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-          }
-          .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #ecfdf5;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            padding: 6px 6px 6px 12px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-            max-width: 100%;
-            transition:
-              background 0.15s ease,
-              border-color 0.15s ease;
-          }
-          .chip:hover {
-            background: #dcfce7;
-            border-color: #86efac;
-          }
-          .chipIcon {
-            font-size: 13px;
-          }
-          .chipLabel {
-            color: #059669;
-            font-weight: 700;
-            font-size: 12px;
-          }
-          .chipValue {
-            color: #111827;
-            font-weight: 600;
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-          .chipClose {
-            width: 22px;
-            height: 22px;
-            border-radius: 999px;
-            border: none;
-            background: rgba(22, 163, 74, 0.15);
-            color: #14532d;
-            font-size: 16px;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition:
-              background 0.15s ease,
-              color 0.15s ease,
-              transform 0.15s ease;
-          }
-          .chipClose:hover {
-            background: #16a34a;
-            color: white;
-            transform: rotate(90deg);
-          }
-          .clearAllBtn {
-            height: 36px;
-            padding: 0 14px;
-            border-radius: 10px;
-            border: 1px solid #fca5a5;
-            background: #fef2f2;
-            color: #b91c1c;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition:
-              background 0.15s ease,
-              color 0.15s ease;
-          }
-          .clearAllBtn:hover {
-            background: #b91c1c;
-            color: white;
-            border-color: #b91c1c;
-          }
+          .appliedLeft { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: 1; min-width: 0; }
+          .appliedTitle { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; color: #14532d; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+          .appliedDot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 4px rgba(34,197,94,0.2); }
+          .appliedCount { background: #16a34a; color: white; font-size: 11px; min-width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 0 6px; }
+          .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+          .chip { display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; border: 1px solid #bbf7d0; color: #166534; padding: 6px 6px 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; max-width: 100%; transition: background .15s ease, border-color .15s ease; }
+          .chip:hover { background: #dcfce7; border-color: #86efac; }
+          .chipIcon { font-size: 13px; }
+          .chipLabel { color: #059669; font-weight: 700; font-size: 12px; }
+          .chipValue { color: #111827; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+          .chipClose { width: 22px; height: 22px; border-radius: 999px; border: none; background: rgba(22,163,74,0.15); color: #14532d; font-size: 16px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s ease, color .15s ease, transform .15s ease; }
+          .chipClose:hover { background: #16a34a; color: white; transform: rotate(90deg); }
+          .clearAllBtn { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid #fca5a5; background: #fef2f2; color: #b91c1c; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; transition: background .15s ease, color .15s ease; }
+          .clearAllBtn:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
 
-          .layout {
-            position: relative;
-            display: block;
-          }
-
-          /* ===== FIXED SIDEBAR ===== */
-          .sidebar {
-            position: fixed;
-            top: 220px;
-            left: max(calc((100vw - min(1400px, 94vw)) / 2), 16px);
-            width: 300px;
-            height: calc(100vh - 240px);
-            border-radius: 22px;
-            opacity: 0;
-            transform: translateX(-48px);
-            transition:
-              opacity 0.5s ease,
-              transform 0.5s ease;
-            z-index: 50;
-            overflow-y: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-          .sidebar::-webkit-scrollbar {
-            display: none;
-          }
-          .sidebar--visible {
-            opacity: 1;
-            transform: translateX(0);
-          }
-
-          .glassOverlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(18px);
-            border-radius: 22px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-          }
-          .sidebarInner {
-            position: relative;
-            z-index: 2;
-            padding: 18px;
-          }
-
-          .filterHeader {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-          }
-          .filterHeader h3 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 800;
-            color: #14532d;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-          .activeDot {
-            background: #16a34a;
-            color: white;
-            font-size: 11px;
-            min-width: 22px;
-            height: 22px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            padding: 0 7px;
-          }
-          .filterIcon {
-            width: 30px;
-            height: 30px;
-            border-radius: 10px;
-            background: #16a34a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-          }
-          .resultBadge {
-            background: #dcfce7;
-            color: #166534;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 800;
-          }
-
-          .filterForm {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-          }
-          .filterGroup label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #374151;
-          }
-
-          .inputWrap {
-            position: relative;
-          }
-          .input {
-            width: 100%;
-            height: 46px;
-            border-radius: 14px;
-            border: 1px solid #d1d5db;
-            padding: 0 38px 0 14px;
-            background: rgba(255, 255, 255, 0.95);
-            font-size: 14px;
-            color: #111827;
-            outline: none;
-            transition:
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
-          }
-          .input:focus {
-            border-color: #16a34a;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
-          }
-          .clearBtn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
-            border-radius: 999px;
-            border: none;
-            background: #e5e7eb;
-            color: #374151;
-            font-size: 16px;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .clearBtn:hover {
-            background: #16a34a;
-            color: white;
-          }
-
-          .dropdown {
-            position: absolute;
-            top: 52px;
-            left: 0;
-            width: 100%;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            z-index: 999;
-            max-height: 280px;
-            overflow-y: auto;
-            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
-            animation: fadeIn 0.15s ease;
-          }
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(-4px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .dropItem {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 11px 14px;
-            border: none;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-            color: #111827;
-            text-align: left;
-            transition: background 0.15s ease;
-          }
-          .dropItem:hover,
-          .dropItem--active {
-            background: #ecfdf5;
-            color: #166534;
-          }
-          .dropIcon {
-            font-size: 14px;
-          }
-          .dropLabel {
-            flex: 1;
-          }
-          .dropTag {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #16a34a;
-            background: #dcfce7;
-            padding: 2px 7px;
-            border-radius: 999px;
-            font-weight: 700;
-          }
-          .dropEmpty {
-            padding: 14px;
-            font-size: 13px;
-            color: #6b7280;
-            text-align: center;
-          }
-
-          .actionRow {
-            display: flex;
-            gap: 8px;
-          }
-          .filterBtn {
-            flex: 1;
-            height: 48px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-            font-weight: 800;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition:
-              transform 0.15s ease,
-              box-shadow 0.2s ease;
-          }
-          .filterBtn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
-          }
-          .resetBtn {
-            height: 48px;
-            padding: 0 14px;
-            border-radius: 14px;
-            border: 1px solid #d1d5db;
-            background: white;
-            color: #374151;
-            font-weight: 700;
-            cursor: pointer;
-          }
-          .resetBtn:hover {
-            background: #f3f4f6;
-          }
-          .ripple {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-          }
-          @keyframes ripple {
-            from {
-              transform: scale(0);
-              opacity: 1;
-            }
-            to {
-              transform: scale(20);
-              opacity: 0;
-            }
-          }
-
-          .content {
-            min-height: 100vh;
-          }
-
+          /* TOPBAR */
           .topbar {
             background: white;
             border-radius: 18px;
@@ -1212,222 +752,135 @@ export default function PropertiesPage() {
             justify-content: space-between;
             align-items: center;
           }
-          .topLabel {
-            color: #16a34a;
-            font-size: 11px;
-            font-weight: 800;
-          }
-          .topbar h2 {
-            margin: 6px 0 0;
-          }
+          .topLabel { color: #16a34a; font-size: 11px; font-weight: 800; }
+          .topbar h2 { margin: 6px 0 0; }
 
-          .list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-          }
-          .cardLink {
-            text-decoration: none;
-          }
-          .card {
+          /* Grid layout — sidebar + content */
+          .layout {
             display: grid;
-            grid-template-columns: 260px 1fr;
-            background: white;
-            border-radius: 18px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            transition:
-              transform 0.2s ease,
-              box-shadow 0.2s ease;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            align-items: start;
           }
-          .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+
+          /* Sticky sidebar — सिर्फ filter, applied bar से अब independent */
+          .sidebar {
+            position: sticky;
+            top: 90px;
+            align-self: start;
+            max-height: calc(100vh - 110px);
+            overflow-y: auto;
+            border-radius: 22px;
+            opacity: 0;
+            transform: translateX(-24px);
+            transition: opacity .5s ease, transform .5s ease;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
           }
-          .imageWrap {
-            position: relative;
-            min-height: 200px;
-          }
-          .verified,
-          .badge,
-          .photoCount {
+          .sidebar::-webkit-scrollbar { display: none; }
+          .sidebar--visible { opacity: 1; transform: translateX(0); }
+
+          .glassOverlay {
             position: absolute;
-            z-index: 10;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 10px;
-            color: white;
-            font-weight: 700;
+            inset: 0;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(18px);
+            border-radius: 22px;
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
           }
-          .verified {
-            top: 10px;
-            left: 10px;
-            background: #16a34a;
+          .sidebarInner { position: relative; z-index: 2; padding: 18px; }
+
+          .filterHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+          .filterHeader h3 { margin: 0; font-size: 1rem; font-weight: 800; color: #14532d; display: flex; align-items: center; gap: 8px; }
+          .activeDot { background: #16a34a; color: white; font-size: 11px; min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 0 7px; }
+          .filterIcon { width: 30px; height: 30px; border-radius: 10px; background: #16a34a; display: flex; align-items: center; justify-content: center; color: white; }
+          .resultBadge { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+
+          .filterForm { display: flex; flex-direction: column; gap: 14px; }
+          .filterGroup label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #374151; }
+          .inputWrap { position: relative; }
+          .input { width: 100%; height: 46px; border-radius: 14px; border: 1px solid #d1d5db; padding: 0 38px 0 14px; background: rgba(255,255,255,0.95); font-size: 14px; color: #111827; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+          .input:focus { border-color: #16a34a; box-shadow: 0 0 0 4px rgba(34,197,94,0.15); }
+          .clearBtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 999px; border: none; background: #e5e7eb; color: #374151; font-size: 16px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+          .clearBtn:hover { background: #16a34a; color: white; }
+
+          .dropdown { position: absolute; top: 52px; left: 0; width: 100%; background: white; border: 1px solid #e5e7eb; border-radius: 14px; z-index: 999; max-height: 280px; overflow-y: auto; box-shadow: 0 14px 40px rgba(0,0,0,0.12); animation: fadeIn .15s ease; }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
           }
-          .badge {
-            bottom: 10px;
-            left: 10px;
-            background: black;
-          }
-          .photoCount {
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-          }
-          .cardContent {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-          }
-          .category {
-            display: inline-flex;
-            background: #ecfdf5;
-            color: #166534;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            width: fit-content;
-          }
-          .title {
-            margin: 0;
-            color: #111827;
-          }
-          .location {
-            margin-top: 8px;
-            color: #64748b;
-          }
-          .features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-          }
-          .feature,
-          .rera {
-            padding: 8px 10px;
-            border-radius: 10px;
-            font-size: 12px;
-          }
-          .feature {
-            background: #f1f5f9;
-            color: #334155;
-          }
-          .rera {
-            background: #fee2e2;
-            color: #b91c1c;
-            font-weight: 700;
-          }
-          .footer {
-            margin-top: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          .price {
-            color: #166534;
-            font-size: 1.3rem;
-            font-weight: 900;
-          }
-          .neg {
-            font-size: 12px;
-            color: #64748b;
-          }
-          .btns {
-            display: flex;
-            gap: 8px;
-          }
-          .primaryBtn,
-          .secondaryBtn {
-            height: 40px;
-            padding: 0 16px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition:
-              transform 0.15s ease,
-              opacity 0.15s ease;
-          }
-          .primaryBtn:hover,
-          .secondaryBtn:hover {
-            transform: translateY(-1px);
-          }
-          .primaryBtn {
-            border: none;
-            background: #16a34a;
-            color: white;
-          }
-          .secondaryBtn {
-            border: 1px solid #d1d5db;
-            background: white;
-            color: #111827;
+          .dropItem { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: none; background: white; cursor: pointer; font-size: 14px; color: #111827; text-align: left; transition: background .15s ease; }
+          .dropItem:hover, .dropItem--active { background: #ecfdf5; color: #166534; }
+          .dropIcon { font-size: 14px; }
+          .dropLabel { flex: 1; }
+          .dropTag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #16a34a; background: #dcfce7; padding: 2px 7px; border-radius: 999px; font-weight: 700; }
+          .dropEmpty { padding: 14px; font-size: 13px; color: #6b7280; text-align: center; }
+
+          .actionRow { display: flex; gap: 8px; }
+          .filterBtn { flex: 1; height: 48px; border: none; border-radius: 14px; background: linear-gradient(135deg, #16a34a, #22c55e); color: white; font-weight: 800; cursor: pointer; position: relative; overflow: hidden; transition: transform .15s ease, box-shadow .2s ease; }
+          .filterBtn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(22,163,74,0.35); }
+          .resetBtn { height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 700; cursor: pointer; }
+          .resetBtn:hover { background: #f3f4f6; }
+          .ripple { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); animation: ripple .6s linear; pointer-events: none; }
+          @keyframes ripple {
+            from { transform: scale(0); opacity: 1; }
+            to { transform: scale(20); opacity: 0; }
           }
 
-          .empty {
-            background: white;
-            padding: 40px;
-            border-radius: 18px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-          }
-          .emptyIcon {
-            font-size: 42px;
-          }
-          .empty h3 {
-            margin: 0;
-            color: #111827;
-          }
-          .empty p {
-            margin: 0;
-            color: #6b7280;
-          }
-          .empty .primaryBtn {
-            margin-top: 8px;
-          }
+          .content { min-width: 0; }
 
-          /* ===== RESPONSIVE ===== */
+          .list { display: flex; flex-direction: column; gap: 16px; }
+          .cardLink { text-decoration: none; }
+          .card { display: grid; grid-template-columns: 260px 1fr; background: white; border-radius: 18px; overflow: hidden; border: 1px solid #e5e7eb; transition: transform .2s ease, box-shadow .2s ease; }
+          .card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+          .imageWrap { position: relative; min-height: 200px; }
+          .verified, .badge, .photoCount { position: absolute; z-index: 10; padding: 6px 10px; border-radius: 999px; font-size: 10px; color: white; font-weight: 700; }
+          .verified { top: 10px; left: 10px; background: #16a34a; }
+          .badge { bottom: 10px; left: 10px; background: black; }
+          .photoCount { bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); }
+          .cardContent { padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
+          .category { display: inline-flex; background: #ecfdf5; color: #166534; padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-bottom: 10px; width: fit-content; }
+          .title { margin: 0; color: #111827; }
+          .location { margin-top: 8px; color: #64748b; }
+          .features { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+          .feature, .rera { padding: 8px 10px; border-radius: 10px; font-size: 12px; }
+          .feature { background: #f1f5f9; color: #334155; }
+          .rera { background: #fee2e2; color: #b91c1c; font-weight: 700; }
+          .footer { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; }
+          .price { color: #166534; font-size: 1.3rem; font-weight: 900; }
+          .neg { font-size: 12px; color: #64748b; }
+          .btns { display: flex; gap: 8px; }
+          .primaryBtn, .secondaryBtn { height: 40px; padding: 0 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: transform .15s ease, opacity .15s ease; }
+          .primaryBtn:hover, .secondaryBtn:hover { transform: translateY(-1px); }
+          .primaryBtn { border: none; background: #16a34a; color: white; }
+          .secondaryBtn { border: 1px solid #d1d5db; background: white; color: #111827; }
+
+          .empty { background: white; padding: 40px; border-radius: 18px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+          .emptyIcon { font-size: 42px; }
+          .empty h3 { margin: 0; color: #111827; }
+          .empty p { margin: 0; color: #6b7280; }
+          .empty .primaryBtn { margin-top: 8px; }
+
+          /* RESPONSIVE */
           @media (max-width: 1024px) {
-            .container {
-              padding-left: 0;
+            .layout {
+              grid-template-columns: 1fr;
             }
             .sidebar {
               position: relative;
               top: 0;
-              left: 0;
-              width: 100%;
-              height: auto;
-              margin-bottom: 20px;
+              max-height: none;
+              overflow: visible;
             }
           }
           @media (max-width: 768px) {
-            .card {
-              grid-template-columns: 1fr;
-            }
-            .footer {
-              flex-direction: column;
-              align-items: stretch;
-              gap: 12px;
-            }
-            .btns {
-              width: 100%;
-            }
-            .primaryBtn,
-            .secondaryBtn {
-              width: 100%;
-            }
-            .appliedBar {
-              flex-direction: column;
-              align-items: stretch;
-            }
-            .clearAllBtn {
-              align-self: flex-end;
-            }
+            .card { grid-template-columns: 1fr; }
+            .footer { flex-direction: column; align-items: stretch; gap: 12px; }
+            .btns { width: 100%; }
+            .primaryBtn, .secondaryBtn { width: 100%; }
+            .appliedBar { flex-direction: column; align-items: stretch; }
+            .clearAllBtn { align-self: flex-end; }
           }
         `}</style>
       </main>

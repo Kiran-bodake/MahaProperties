@@ -39,62 +39,36 @@ export default async function BlogDetail({
   return (
     <>
       <MegaNavbar />
+
       <main>
-        <div style={{ background: "#f9fafb" }}>
-          {/* HERO */}
-          <div style={{ maxWidth: "1000px", margin: "auto", padding: "20px" }}>
-            {/* BREADCRUMB */}
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "10px",
-              }}
-            >
+        <div style={{ background: "#f9fafb", padding: "30px 0" }}>
+          {/* 🔥 BREADCRUMB (FULL WIDTH TOP) */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "auto",
+              padding: "0 20px 10px",
+            }}
+          >
+            <div style={{ fontSize: "15px", color: "#6b7280" }}>
               <Link href="/">Home</Link> {" > "}
               <Link href="/blogs">Blogs</Link> {" > "}
               <span style={{ fontWeight: 600 }}>{blog.t}</span>
             </div>
+          </div>
 
-            {/* CATEGORY */}
-            <span
-              style={{
-                background: "#fef3c7",
-                color: "#b45309",
-                padding: "4px 10px",
-                borderRadius: "999px",
-                fontSize: "11px",
-                fontWeight: 600,
-              }}
-            >
-              {blog.cat}
-            </span>
-
-            {/* TITLE */}
-            <h1
-              style={{
-                fontFamily: "var(--font-syne,Syne,serif)",
-                fontSize: "clamp(1.6rem, 5vw, 2.4rem)", // ✅ responsive
-                fontWeight: 900,
-                margin: "10px 0",
-                lineHeight: 1.3,
-                color: "#111827",
-              }}
-            >
-              {blog.t}
-            </h1>
-
-            {/* META */}
-            <p
-              style={{
-                color: "#9ca3af",
-                fontSize: "13px",
-                marginBottom: "15px",
-              }}
-            >
-              {blog.d} • {blog.r}
-            </p>
-
+          {/* 🔥 HERO (IMAGE LEFT - TEXT RIGHT) */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "auto",
+              padding: "20px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))",
+              gap: "30px",
+              alignItems: "center",
+            }}
+          >
             {/* IMAGE */}
             <div style={{ borderRadius: "16px", overflow: "hidden" }}>
               <img
@@ -102,32 +76,67 @@ export default async function BlogDetail({
                 alt={blog.t}
                 style={{
                   width: "100%",
-                  height: "clamp(220px, 40vw, 420px)", // ✅ responsive height
+                  height: "100%",
                   objectFit: "cover",
                 }}
               />
             </div>
-          </div>
 
-          {/* CONTENT */}
-          <div
-            style={{
-              maxWidth: "720px",
-              margin: "auto",
-              padding: "30px 20px 50px",
-              fontSize: "clamp(14px, 1.2vw, 17px)", // ✅ responsive text
-              lineHeight: 1.8,
-              color: "#374151",
-            }}
-          >
-            {blog.excerpt.split(". ").map((p, i) => (
-              <p key={i} style={{ marginBottom: "16px" }}>
-                {p}.
+            {/* TEXT */}
+            <div>
+              {/* CATEGORY */}
+              <span
+                style={{
+                  background: "#fef3c7",
+                  color: "#b45309",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                }}
+              >
+                {blog.cat}
+              </span>
+
+              {/* TITLE */}
+              <h1
+                style={{
+                  fontFamily: "var(--font-syne,Syne,serif)",
+                  fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+                  fontWeight: 900,
+                  margin: "12px 0",
+                  lineHeight: 1.3,
+                  color: "#111827",
+                }}
+              >
+                {blog.t}
+              </h1>
+
+              {/* META */}
+              <p
+                style={{
+                  color: "#9ca3af",
+                  fontSize: "13px",
+                  marginBottom: "15px",
+                }}
+              >
+                {blog.d} • {blog.r}
               </p>
-            ))}
+
+              {/* EXCERPT */}
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#4b5563",
+                  lineHeight: 1.7,
+                }}
+              >
+                {blog.excerpt}
+              </p>
+            </div>
           </div>
 
-          {/* RELATED BLOGS */}
+          {/* 🔥 RELATED BLOGS */}
           {related.length > 0 && (
             <div
               style={{
@@ -151,7 +160,7 @@ export default async function BlogDetail({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))", // ✅ responsive grid
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
                   gap: "16px",
                 }}
               >
@@ -168,7 +177,6 @@ export default async function BlogDetail({
                         overflow: "hidden",
                         border: "1px solid #eee",
                         boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                        transition: "0.3s",
                       }}
                     >
                       <img
@@ -182,17 +190,9 @@ export default async function BlogDetail({
                       />
 
                       <div style={{ padding: "12px" }}>
-                        <h3
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: 700,
-                            marginBottom: "6px",
-                            color: "#111827",
-                          }}
-                        >
+                        <h3 style={{ fontSize: "14px", fontWeight: 700 }}>
                           {b.t}
                         </h3>
-
                         <p style={{ fontSize: "12px", color: "#9ca3af" }}>
                           {b.d} • {b.r}
                         </p>
@@ -205,6 +205,7 @@ export default async function BlogDetail({
           )}
         </div>
       </main>
+
       <Footer />
     </>
   );

@@ -6,6 +6,10 @@ import React, { useEffect, useState, useCallback } from "react";
 type Props = {
   open: boolean;
   onClose: () => void;
+
+  // MAKE OPTIONAL SO NO ERROR COMES
+  propertyId?: string;
+  propertyName?: string;
 };
 
 const showcaseSlides = [
@@ -29,7 +33,12 @@ const showcaseSlides = [
   },
 ];
 
-export default function ContactPopup({ open, onClose }: Props) {
+export default function ContactPopup({
+  open,
+  onClose,
+  propertyId = "unknown-property-id",
+  propertyName = "Unknown Property",
+}: Props) {
   const [selected, setSelected] = useState("Buy");
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -37,14 +46,19 @@ export default function ContactPopup({ open, onClose }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [whatsappConsent, setWhatsappConsent] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const goNext = useCallback(() => {
-    setActiveSlide((p) => (p === showcaseSlides.length - 1 ? 0 : p + 1));
+    setActiveSlide((p) =>
+      p === showcaseSlides.length - 1 ? 0 : p + 1
+    );
   }, []);
 
   const goPrev = useCallback(() => {
-    setActiveSlide((p) => (p === 0 ? showcaseSlides.length - 1 : p - 1));
+    setActiveSlide((p) =>
+      p === 0 ? showcaseSlides.length - 1 : p - 1
+    );
   }, []);
 
   // SAVE DATA TO MONGODB
@@ -54,10 +68,8 @@ export default function ContactPopup({ open, onClose }: Props) {
       return;
     }
 
-    // remove non-numeric characters
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // validate 10 digit mobile number
     if (cleanPhone.length !== 10) {
       alert("Invalid mobile number. Please enter 10 digits.");
       return;
@@ -71,11 +83,15 @@ export default function ContactPopup({ open, onClose }: Props) {
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({
+          propertyId,
+          propertyName,
           name,
-          phone: cleanPhone,
+          mobileNumber: cleanPhone,
           email,
           interest: selected,
+          whatsappConsent,
         }),
       });
 
@@ -84,14 +100,16 @@ export default function ContactPopup({ open, onClose }: Props) {
       if (data.success) {
         alert("Information saved successfully");
 
+        // RESET FORM
         setName("");
         setPhone("");
         setEmail("");
         setSelected("Buy");
+        setWhatsappConsent(true);
 
         onClose();
       } else {
-        alert("Failed to save information");
+        alert(data.message || "Failed to save information");
       }
     } catch (error) {
       console.error(error);
@@ -130,17 +148,27 @@ export default function ContactPopup({ open, onClose }: Props) {
               {showcaseSlides.map((slide, index) => (
                 <div
                   key={index}
-                  className={`slide ${activeSlide === index ? "active" : ""}`}
-                  style={{ backgroundImage: `url(${slide.image})` }}
+                  className={`slide ${
+                    activeSlide === index ? "active" : ""
+                  }`}
+                  style={{
+                    backgroundImage: `url(${slide.image})`,
+                  }}
                 >
                   <div className="slideOverlay" />
 
                   <div className="slideContent">
-                    <span className="brandBadge">★ MAHAPROPERTY</span>
+                    <span className="brandBadge">
+                      ★ MAHAPROPERTYS
+                    </span>
 
-                    <h2 className="slideTitle">{slide.title}</h2>
+                    <h2 className="slideTitle">
+                      {slide.title}
+                    </h2>
 
-                    <p className="slideDesc">{slide.desc}</p>
+                    <p className="slideDesc">
+                      {slide.desc}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -168,9 +196,13 @@ export default function ContactPopup({ open, onClose }: Props) {
                   <button
                     key={index}
                     className={`dot ${
-                      activeSlide === index ? "activeDot" : ""
+                      activeSlide === index
+                        ? "activeDot"
+                        : ""
                     }`}
-                    onClick={() => setActiveSlide(index)}
+                    onClick={() =>
+                      setActiveSlide(index)
+                    }
                   />
                 ))}
               </div>
@@ -183,23 +215,34 @@ export default function ContactPopup({ open, onClose }: Props) {
               <h2>Contact Property Owner</h2>
 
               <p>
-                Get pricing details, brochures, site visit support and expert
+                Get pricing details, brochures,
+                site visit support and expert
                 consultation instantly.
               </p>
             </div>
 
             {/* INTEREST */}
             <div className="section">
-              <label className="label">I am interested in</label>
+              <label className="label">
+                I am interested in
+              </label>
 
               <div className="radioWrap">
-                {["Buy", "Rent", "Investment"].map((item) => (
+                {[
+                  "Buy",
+                  "Rent",
+                  "Investment",
+                ].map((item) => (
                   <button
                     key={item}
                     type="button"
-                    onClick={() => setSelected(item)}
+                    onClick={() =>
+                      setSelected(item)
+                    }
                     className={
-                      selected === item ? "pillBtn active" : "pillBtn"
+                      selected === item
+                        ? "pillBtn active"
+                        : "pillBtn"
                     }
                   >
                     {item}
@@ -215,7 +258,9 @@ export default function ContactPopup({ open, onClose }: Props) {
                 placeholder="Your Name"
                 className="input"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) =>
+                  setName(e.target.value)
+                }
               />
 
               <input
@@ -224,8 +269,14 @@ export default function ContactPopup({ open, onClose }: Props) {
                 className="input"
                 value={phone}
                 maxLength={10}
-                pattern="[0-9]{10}"
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) =>
+                  setPhone(
+                    e.target.value.replace(
+                      /[^0-9]/g,
+                      ""
+                    )
+                  )
+                }
               />
 
               <input
@@ -233,13 +284,26 @@ export default function ContactPopup({ open, onClose }: Props) {
                 placeholder="Email Address"
                 className="input"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
               />
             </div>
 
             <label className="checkWrap">
-              <input type="checkbox" defaultChecked />
-              <span>Get instant updates on WhatsApp</span>
+              <input
+                type="checkbox"
+                checked={whatsappConsent}
+                onChange={(e) =>
+                  setWhatsappConsent(
+                    e.target.checked
+                  )
+                }
+              />
+
+              <span>
+                Get instant updates on WhatsApp
+              </span>
             </label>
 
             {/* SUBMIT */}
@@ -248,11 +312,14 @@ export default function ContactPopup({ open, onClose }: Props) {
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "Saving..." : "Get Contact Details"}
+              {loading
+                ? "Saving..."
+                : "Get Contact Details"}
             </button>
 
             <div className="trustInfo">
-              🔒 Your information is safe & secure with MahaProperty
+              🔒 Your information is safe &
+              secure with MahaPropertys
             </div>
           </div>
         </div>
@@ -462,6 +529,7 @@ export default function ContactPopup({ open, onClose }: Props) {
           display: flex;
           gap: 10px;
           margin-top: 10px;
+          align-items: center;
         }
 
         .submitBtn {

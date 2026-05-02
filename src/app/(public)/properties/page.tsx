@@ -1,3 +1,4 @@
+
 "use client";
 // src/app/(public)/properties/page.tsx
 
@@ -39,7 +40,7 @@ type SortKey = "newest" | "price_asc" | "price_desc" | "popular";
 
 type Filters = {
   q: string;
-  category: string;
+  category: string[]; // multi-select
   locality: string;
   sortBy: SortKey;
 };
@@ -48,6 +49,7 @@ type Filters = {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+const FAV_KEY = "myFavoriteProperties";
 
 const SORT_LABELS: Record<SortKey, string> = {
   newest: "Newest First",
@@ -101,6 +103,23 @@ function getLocalityParts(p: Property): { locality: string; city: string } {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Favorites helpers (localStorage)                                   */
+/* ------------------------------------------------------------------ */
+function getPropKey(p: Property): string {
+  return String(p.id || p._id || p.slug);
+}
+
+function readFavorites(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(FAV_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /*  API                                                                */
 /* ------------------------------------------------------------------ */
 async function fetchAllProperties(signal?: AbortSignal): Promise<Property[]> {
@@ -129,9 +148,19 @@ export default function PropertiesPage() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null);
 
+  // ✅ SELECTED PROPERTY FOR CONTACT POPUP
+  const [selectedProperty, setSelectedProperty] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  // Favorites state
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [toast, setToast] = useState<string>("");
+
   const [filters, setFilters] = useState<Filters>({
     q: searchParams.get("q") || "",
-    category: searchParams.get("category") || "",
+    category: searchParams.getAll("category") || [],
     locality: searchParams.get("locality") || "",
     sortBy: (searchParams.get("sortBy") as SortKey) || "newest",
   });
@@ -140,7 +169,7 @@ export default function PropertiesPage() {
     if (type || location) {
       setFilters((prev) => ({
         ...prev,
-        category: type || prev.category,
+        category: type ? [type] : prev.category,
         locality: location || prev.locality,
       }));
     }
@@ -149,6 +178,7 @@ export default function PropertiesPage() {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showCatDropdown, setShowCatDropdown] = useState(false);
   const [activeCityIdx, setActiveCityIdx] = useState<number>(-1);
+  const [catInput, setCatInput] = useState("");
 
   const debouncedFilters = useDebounced(filters, 250);
 
@@ -159,6 +189,17 @@ export default function PropertiesPage() {
   useEffect(() => {
     const t = setTimeout(() => setSidebarVisible(true), 60);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    setFavorites(readFavorites());
+    const sync = () => setFavorites(readFavorites());
+    window.addEventListener("favorites-updated", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("favorites-updated", sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
 
   useEffect(() => {
@@ -178,11 +219,10 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     const qs = new URLSearchParams();
-    Object.entries(debouncedFilters).forEach(([k, v]) => {
-      if (v && !(k === "sortBy" && v === "newest")) {
-        qs.append(k, String(v));
-      }
-    });
+    if (debouncedFilters.q) qs.append("q", debouncedFilters.q);
+    debouncedFilters.category.forEach((cat) => qs.append("category", cat));
+    if (debouncedFilters.locality) qs.append("locality", debouncedFilters.locality);
+    if (debouncedFilters.sortBy !== "newest") qs.append("sortBy", debouncedFilters.sortBy);
     if (type) qs.set("type", type);
     if (location) qs.set("location", location);
     const next = qs.toString();
@@ -242,14 +282,14 @@ export default function PropertiesPage() {
   }, [debouncedFilters.locality, cities, localities]);
 
   const categorySuggestions = useMemo(() => {
-    const q = norm(debouncedFilters.category);
+    const q = norm(catInput);
     if (!q) return uniqueCategories.slice(0, 8);
     return uniqueCategories.filter((c) => norm(c).includes(q)).slice(0, 8);
-  }, [debouncedFilters.category, uniqueCategories]);
+  }, [catInput, uniqueCategories]);
 
   const properties = useMemo(() => {
     const q = norm(debouncedFilters.q);
-    const cat = norm(debouncedFilters.category);
+    const selectedCats = debouncedFilters.category.map((c) => norm(c));
     const loc = norm(debouncedFilters.locality);
 
     let list = allProperties.filter((p) => {
@@ -258,8 +298,9 @@ export default function PropertiesPage() {
       const locality = norm(p.locality || p.loc);
       const city = norm(p.city);
       const haystack = `${title} ${category} ${locality} ${city}`;
+
       if (q && !haystack.includes(q)) return false;
-      if (cat && !category.includes(cat)) return false;
+      if (selectedCats.length > 0 && !selectedCats.includes(category)) return false;
       if (loc && !locality.includes(loc) && !city.includes(loc)) return false;
       return true;
     });
@@ -294,13 +335,40 @@ export default function PropertiesPage() {
     setFilters((prev) => ({ ...prev, [k]: v }));
   }, []);
 
+  const toggleCategory = (cat: string) => {
+    setFilters((prev) => {
+      const updated = prev.category.includes(cat)
+        ? prev.category.filter((c) => c !== cat)
+        : [...prev.category, cat];
+      return { ...prev, category: updated };
+    });
+  };
+
   const resetFilters = () =>
-    setFilters({ q: "", category: "", locality: "", sortBy: "newest" });
+    setFilters({ q: "", category: [], locality: "", sortBy: "newest" });
 
   const handleRipple = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setRipple({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     setTimeout(() => setRipple(null), 600);
+  };
+
+  const toggleFavorite = (e: React.MouseEvent, p: Property) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const key = getPropKey(p);
+    const stored: string[] = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
+    let updated: string[];
+    if (stored.includes(key)) {
+      updated = stored.filter((id) => id !== key);
+      setToast("Removed from favorites");
+    } else {
+      updated = [...stored, key];
+      setToast("Added to favorites ❤");
+    }
+    localStorage.setItem(FAV_KEY, JSON.stringify(updated));
+    setFavorites(updated);
+    setTimeout(() => setToast(""), 1800);
   };
 
   const onCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -325,28 +393,34 @@ export default function PropertiesPage() {
 
   const activeFiltersCount =
     Number(!!filters.q) +
-    Number(!!filters.category) +
+    Number(filters.category.length > 0) +
     Number(!!filters.locality) +
     Number(filters.sortBy !== "newest");
 
   const appliedChips: Array<{
-    key: keyof Filters;
+    key: keyof Filters | string;
     label: string;
     value: string;
     icon: string;
   }> = [];
   if (filters.q)
     appliedChips.push({ key: "q", label: "Search", value: filters.q, icon: "🔍" });
-  if (filters.category)
-    appliedChips.push({ key: "category", label: "Type", value: filters.category, icon: "🏷️" });
+  filters.category.forEach((cat) => {
+    appliedChips.push({ key: `cat-${cat}`, label: "Type", value: cat, icon: "🏷️" });
+  });
   if (filters.locality)
     appliedChips.push({ key: "locality", label: "Location", value: filters.locality, icon: "📍" });
   if (filters.sortBy !== "newest")
     appliedChips.push({ key: "sortBy", label: "Sort", value: SORT_LABELS[filters.sortBy], icon: "↕️" });
 
-  const clearChip = (key: keyof Filters) => {
+  const clearChip = (key: keyof Filters | string) => {
     if (key === "sortBy") setF("sortBy", "newest");
-    else setF(key, "");
+    else if (key === "q") setF("q", "");
+    else if (key === "locality") setF("locality", "");
+    else if (typeof key === "string" && key.startsWith("cat-")) {
+      const cat = key.replace("cat-", "");
+      toggleCategory(cat);
+    }
   };
 
   /* ================================================================ */
@@ -355,7 +429,17 @@ export default function PropertiesPage() {
   return (
     <>
       <MegaNavbar />
-      <ContactPopup open={showPopup} onClose={() => setShowPopup(false)} />
+
+      {/* ✅ PASS REAL propertyId & propertyName TO POPUP */}
+      <ContactPopup
+        open={showPopup}
+        onClose={() => {
+          setShowPopup(false);
+          setSelectedProperty(null);
+        }}
+        propertyId={selectedProperty?.id}
+        propertyName={selectedProperty?.name}
+      />
 
       <main className="page">
         <div className="container">
@@ -366,10 +450,16 @@ export default function PropertiesPage() {
               Explore verified NA plots, commercial properties, warehouses and
               investment opportunities in prime locations.
             </p>
+
+            <Link href="/favorites" className="favLink">
+              <span className="favLinkHeart">❤</span>
+              My Favorites
+              <span className="favLinkCount">{favorites.length}</span>
+            </Link>
           </section>
 
           <section className="layout">
-            {/* SIDEBAR — left */}
+            {/* SIDEBAR */}
             <aside className={`sidebar ${sidebarVisible ? "sidebar--visible" : ""}`}>
               <div className="glassOverlay" />
               <div className="sidebarInner">
@@ -394,7 +484,7 @@ export default function PropertiesPage() {
                       <input
                         id="f-search"
                         type="text"
-                        placeholder="Try “NA plots”, “warehouse”…"
+                        placeholder='Try "NA plots", "warehouse"…'
                         className="input"
                         value={filters.q}
                         onChange={(e) => setF("q", e.target.value)}
@@ -412,7 +502,7 @@ export default function PropertiesPage() {
                     </div>
                   </div>
 
-                  {/* CATEGORY */}
+                  {/* CATEGORY — MULTI SELECT */}
                   <div className="filterGroup">
                     <label htmlFor="f-cat">Property Type</label>
                     <div className="inputWrap" ref={catWrapRef}>
@@ -421,36 +511,49 @@ export default function PropertiesPage() {
                         type="text"
                         placeholder="Residential, NA Plot, Warehouse…"
                         className="input"
-                        value={filters.category}
+                        value={catInput}
                         autoComplete="off"
                         onFocus={() => setShowCatDropdown(true)}
                         onChange={(e) => {
-                          setF("category", e.target.value);
+                          setCatInput(e.target.value);
                           setShowCatDropdown(true);
                         }}
                       />
-                      {filters.category && (
-                        <button
-                          type="button"
-                          className="clearBtn"
-                          aria-label="Clear category"
-                          onClick={() => setF("category", "")}
-                        >
-                          ×
-                        </button>
+
+                      {filters.category.length > 0 && (
+                        <div className="selectedTags">
+                          {filters.category.map((cat) => (
+                            <span key={cat} className="selectedTag">
+                              {cat}
+                              <button
+                                type="button"
+                                onClick={() => toggleCategory(cat)}
+                                className="selectedTagClose"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
                       )}
+
                       {showCatDropdown && categorySuggestions.length > 0 && (
                         <div className="dropdown" role="listbox">
                           {categorySuggestions.map((cat) => (
                             <button
                               type="button"
                               key={cat}
-                              className="dropItem"
+                              className={`dropItem ${
+                                filters.category.includes(cat) ? "dropItem--selected" : ""
+                              }`}
                               onClick={() => {
-                                setF("category", cat);
-                                setShowCatDropdown(false);
+                                toggleCategory(cat);
+                                setCatInput("");
                               }}
                             >
+                              <span className="dropCheckbox">
+                                {filters.category.includes(cat) ? "✓" : ""}
+                              </span>
                               <span className="dropIcon">🏷️</span>
                               {cat}
                             </button>
@@ -567,9 +670,8 @@ export default function PropertiesPage() {
               </div>
             </aside>
 
-            {/* RIGHT CONTENT — applied bar + topbar + cards सब यहाँ */}
+            {/* RIGHT CONTENT */}
             <div className="content">
-              {/* ✅ APPLIED FILTERS BAR — अब right column में */}
               {appliedChips.length > 0 && (
                 <section className="appliedBar" aria-label="Applied filters">
                   <div className="appliedLeft">
@@ -602,7 +704,6 @@ export default function PropertiesPage() {
                 </section>
               )}
 
-              {/* TOPBAR */}
               <div className="topbar">
                 <div>
                   <span className="topLabel">PROPERTY RESULTS</span>
@@ -613,10 +714,13 @@ export default function PropertiesPage() {
                 <p>Verified listings updated daily</p>
               </div>
 
-              {/* CARDS */}
               <div className="list">
                 {properties.map((p) => {
                   const images = p.images && p.images.length > 0 ? p.images : [p.img];
+                  const key = getPropKey(p);
+                  const isFav =
+                    typeof window !== "undefined" &&
+                    JSON.parse(localStorage.getItem(FAV_KEY) || "[]").includes(key);
                   return (
                     <Link
                       key={p.id || p._id || p.slug}
@@ -632,6 +736,27 @@ export default function PropertiesPage() {
                           <div className="verified">VERIFIED</div>
                           {p.badge && <div className="badge">{p.badge}</div>}
                           <div className="photoCount">📸 {images.length}</div>
+
+                          <button
+                            type="button"
+                            aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+                            aria-pressed={isFav}
+                            className={`favBtn ${isFav ? "favBtn--active" : ""}`}
+                            onClick={(e) => toggleFavorite(e, p)}
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="20"
+                              height="20"
+                              fill={isFav ? "#ffffff" : "none"}
+                              stroke={isFav ? "#ffffff" : "#111827"}
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                          </button>
                         </div>
                         <div className="cardContent">
                           <div>
@@ -650,10 +775,16 @@ export default function PropertiesPage() {
                               <span className="neg">Negotiable</span>
                             </div>
                             <div className="btns">
+                              {/* ✅ CAPTURE PROPERTY ID + NAME ON CONTACT CLICK */}
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
+                                  e.stopPropagation();
+                                  setSelectedProperty({
+                                    id: String(p.id || p._id || p.slug),
+                                    name: p.title || p.t || "Property",
+                                  });
                                   setShowPopup(true);
                                 }}
                                 className="secondaryBtn"
@@ -686,17 +817,12 @@ export default function PropertiesPage() {
           </section>
         </div>
 
+        {toast && <div className="toast">{toast}</div>}
+
         {/* ============ STYLES ============ */}
         <style jsx>{`
-          .page {
-            background: #f0f4f8;
-            min-height: 100vh;
-            padding: 16px 0 40px;
-          }
-          .container {
-            width: min(1400px, 94%);
-            margin: auto;
-          }
+          .page { background: #f0f4f8; min-height: 100vh; padding: 16px 0 40px; }
+          .container { width: min(1400px, 94%); margin: auto; }
 
           .hero {
             background: linear-gradient(135deg, #052e16, #166534, #22c55e);
@@ -704,29 +830,47 @@ export default function PropertiesPage() {
             padding: 24px;
             color: white;
             margin-bottom: 20px;
+            position: relative;
           }
           .hero h1 { margin: 0; font-size: 2.2rem; font-weight: 800; }
           .hero p { margin-top: 10px; max-width: 700px; line-height: 1.5; }
 
-          /* APPLIED FILTERS BAR — अब right column में, cards के साथ aligned */
-          .appliedBar {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 18px;
-            display: flex;
-            justify-content: space-between;
+          .favLink {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: inline-flex;
             align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-            animation: slideDown 0.3s ease;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: white;
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            transition: background .2s ease, transform .2s ease;
           }
-          @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
+          .favLink:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
+          .favLinkHeart { color: #fecaca; font-size: 14px; }
+          .favLinkCount {
+            background: white;
+            color: #166534;
+            min-width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 0 7px;
+            font-size: 12px;
+            font-weight: 800;
           }
+
+          .appliedBar { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: 0 4px 14px rgba(0,0,0,0.04); animation: slideDown 0.3s ease; }
+          @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
           .appliedLeft { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: 1; min-width: 0; }
           .appliedTitle { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; color: #14532d; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
           .appliedDot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 4px rgba(34,197,94,0.2); }
@@ -742,53 +886,17 @@ export default function PropertiesPage() {
           .clearAllBtn { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid #fca5a5; background: #fef2f2; color: #b91c1c; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; transition: background .15s ease, color .15s ease; }
           .clearAllBtn:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
 
-          /* TOPBAR */
-          .topbar {
-            background: white;
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
+          .topbar { background: white; border-radius: 18px; padding: 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
           .topLabel { color: #16a34a; font-size: 11px; font-weight: 800; }
           .topbar h2 { margin: 6px 0 0; }
 
-          /* Grid layout — sidebar + content */
-          .layout {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-            align-items: start;
-          }
+          .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
 
-          /* Sticky sidebar — सिर्फ filter, applied bar से अब independent */
-          .sidebar {
-            position: sticky;
-            top: 90px;
-            align-self: start;
-            max-height: calc(100vh - 110px);
-            overflow-y: auto;
-            border-radius: 22px;
-            opacity: 0;
-            transform: translateX(-24px);
-            transition: opacity .5s ease, transform .5s ease;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
+          .sidebar { position: sticky; top: 90px; align-self: start; max-height: calc(100vh - 110px); overflow-y: auto; border-radius: 22px; opacity: 0; transform: translateX(-24px); transition: opacity .5s ease, transform .5s ease; scrollbar-width: none; -ms-overflow-style: none; }
           .sidebar::-webkit-scrollbar { display: none; }
           .sidebar--visible { opacity: 1; transform: translateX(0); }
 
-          .glassOverlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(18px);
-            border-radius: 22px;
-            border: 1px solid rgba(255,255,255,0.4);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
-          }
+          .glassOverlay { position: absolute; inset: 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(18px); border-radius: 22px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
           .sidebarInner { position: relative; z-index: 2; padding: 18px; }
 
           .filterHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
@@ -805,13 +913,84 @@ export default function PropertiesPage() {
           .clearBtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 999px; border: none; background: #e5e7eb; color: #374151; font-size: 16px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
           .clearBtn:hover { background: #16a34a; color: white; }
 
-          .dropdown { position: absolute; top: 52px; left: 0; width: 100%; background: white; border: 1px solid #e5e7eb; border-radius: 14px; z-index: 999; max-height: 280px; overflow-y: auto; box-shadow: 0 14px 40px rgba(0,0,0,0.12); animation: fadeIn .15s ease; }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
+          .selectedTags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #ecfdf5;
+            border-radius: 10px;
+            margin-top: 8px;
           }
-          .dropItem { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: none; background: white; cursor: pointer; font-size: 14px; color: #111827; text-align: left; transition: background .15s ease; }
+          .selectedTag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+          }
+          .selectedTagClose {
+            width: 16px;
+            height: 16px;
+            border: none;
+            background: rgba(22, 163, 74, 0.2);
+            color: #166534;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            padding: 0;
+            line-height: 1;
+          }
+          .selectedTagClose:hover {
+            background: #16a34a;
+            color: white;
+          }
+
+          .dropdown { position: absolute; top: 52px; left: 0; width: 100%; background: white; border: 1px solid #e5e7eb; border-radius: 14px; z-index: 999; max-height: 280px; overflow-y: auto; box-shadow: 0 14px 40px rgba(0,0,0,0.12); animation: fadeIn .15s ease; }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+          .dropItem {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            color: #111827;
+            text-align: left;
+            transition: background .15s ease;
+          }
           .dropItem:hover, .dropItem--active { background: #ecfdf5; color: #166534; }
+
+          .dropCheckbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            font-weight: 700;
+            transition: background .15s ease, border-color .15s ease;
+          }
+          .dropItem--selected .dropCheckbox {
+            background: #16a34a;
+            border-color: #16a34a;
+          }
+
           .dropIcon { font-size: 14px; }
           .dropLabel { flex: 1; }
           .dropTag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #16a34a; background: #dcfce7; padding: 2px 7px; border-radius: 999px; font-weight: 700; }
@@ -823,10 +1002,7 @@ export default function PropertiesPage() {
           .resetBtn { height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 700; cursor: pointer; }
           .resetBtn:hover { background: #f3f4f6; }
           .ripple { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); animation: ripple .6s linear; pointer-events: none; }
-          @keyframes ripple {
-            from { transform: scale(0); opacity: 1; }
-            to { transform: scale(20); opacity: 0; }
-          }
+          @keyframes ripple { from { transform: scale(0); opacity: 1; } to { transform: scale(20); opacity: 0; } }
 
           .content { min-width: 0; }
 
@@ -839,6 +1015,36 @@ export default function PropertiesPage() {
           .verified { top: 10px; left: 10px; background: #16a34a; }
           .badge { bottom: 10px; left: 10px; background: black; }
           .photoCount { bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); }
+
+          .favBtn {
+            position: absolute;
+            top: 12px;
+            left: 850px;
+            z-index: 50;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+          }
+          .favBtn:hover { transform: scale(1.08); background: #ffffff; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22); }
+          .favBtn:active { transform: scale(0.92); }
+          .favBtn--active { background: #e11d48; }
+          .favBtn--active:hover { background: #be123c; }
+          .favBtn svg { transition: transform 0.2s ease; }
+          .favBtn--active svg { animation: heartPop 0.35s ease; }
+          @keyframes heartPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+          }
+
           .cardContent { padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
           .category { display: inline-flex; background: #ecfdf5; color: #166534; padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-bottom: 10px; width: fit-content; }
           .title { margin: 0; color: #111827; }
@@ -862,17 +1068,30 @@ export default function PropertiesPage() {
           .empty p { margin: 0; color: #6b7280; }
           .empty .primaryBtn { margin-top: 8px; }
 
-          /* RESPONSIVE */
+          .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111827;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            z-index: 9999;
+            animation: toastIn .25s ease;
+          }
+          @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+          }
+
           @media (max-width: 1024px) {
-            .layout {
-              grid-template-columns: 1fr;
-            }
-            .sidebar {
-              position: relative;
-              top: 0;
-              max-height: none;
-              overflow: visible;
-            }
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: relative; top: 0; max-height: none; overflow: visible; }
+            .favLink { position: static; margin-top: 14px; }
           }
           @media (max-width: 768px) {
             .card { grid-template-columns: 1fr; }

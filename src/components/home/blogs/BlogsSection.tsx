@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 type Blog = {
   s: string;
   t: string;
+  excerpt: string;
   cat: string;
   d: string;
   r: string;
@@ -89,7 +90,7 @@ export function BlogsSection() {
             </p>
           </div>
           <Link
-            href="/blog"
+            href="/blogs"
             style={{
               padding: "10px 22px",
               borderRadius: "12px",
@@ -111,7 +112,7 @@ export function BlogsSection() {
           }}
         >
           {/* Featured */}
-          <Link href={`/blog/${main.slug}`} style={{ textDecoration: "none" }}>
+          <Link href={`/blogs/${main?.s}`} style={{ textDecoration: "none" }}>
             <div
               style={{
                 background: "white",
@@ -144,7 +145,7 @@ export function BlogsSection() {
               >
                 <img
                   src={main.img}
-                  alt={main.title}
+                  alt={main?.t}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -163,14 +164,14 @@ export function BlogsSection() {
                 >
                   <span
                     style={{
-                      ...cc[main.category],
+                      ...cc[main?.cat],
                       padding: "5px 12px",
                       borderRadius: "100px",
                       fontSize: "0.75rem",
                       fontWeight: 700,
                     }}
                   >
-                    {main.category}
+                    {main?.cat}
                   </span>
                 </div>
                 <div
@@ -200,7 +201,7 @@ export function BlogsSection() {
                     lineHeight: 1.35,
                   }}
                 >
-                  {main.title}
+                  {main?.t}
                 </h3>
                 <p
                   style={{
@@ -220,8 +221,8 @@ export function BlogsSection() {
                     color: "#9ca3af",
                   }}
                 >
-                  <span>📅 {main.date}</span>
-                  <span>⏱ {main.readTime} read</span>
+                  <span>📅 {main?.d}</span>
+                  <span>⏱ {main?.r} read</span>
                 </div>
               </div>
             </div>
@@ -233,8 +234,8 @@ export function BlogsSection() {
           >
             {rest.map((b) => (
               <Link
-                key={b.slug}
-                href={`/blog/${b.slug}`}
+                key={b.s}
+                href={`/blog/${b.s}`}
                 style={{ textDecoration: "none" }}
               >
                 <div
@@ -270,7 +271,7 @@ export function BlogsSection() {
                   >
                     <img
                       src={b.img}
-                      alt={b.title}
+                      alt={b.t}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -281,7 +282,7 @@ export function BlogsSection() {
                   <div style={{ padding: "14px 16px" }}>
                     <span
                       style={{
-                        ...cc[b.category],
+                        ...cc[b.cat],
                         display: "inline-block",
                         padding: "3px 10px",
                         borderRadius: "100px",
@@ -290,7 +291,7 @@ export function BlogsSection() {
                         marginBottom: "8px",
                       }}
                     >
-                      {b.category}
+                      {b.cat}
                     </span>
                     <h3
                       style={{
@@ -302,7 +303,7 @@ export function BlogsSection() {
                         marginBottom: "8px",
                       }}
                     >
-                      {b.title}
+                      {b.t}
                     </h3>
                     <div
                       style={{
@@ -312,8 +313,8 @@ export function BlogsSection() {
                         color: "#9ca3af",
                       }}
                     >
-                      <span>{b.date}</span>
-                      <span>{b.readTime} read</span>
+                      <span>{b.d}</span>
+                      <span>{b.r} read</span>
                     </div>
                   </div>
                 </div>

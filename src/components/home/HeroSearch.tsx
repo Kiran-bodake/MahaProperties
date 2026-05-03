@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Search, Tag, MapPin } from "lucide-react";
 
 type Property = {
   category?: string;
@@ -129,7 +130,9 @@ export default function HeroSearch() {
     >
       {/* SEARCH */}
       <div style={{ position: "relative" }}>
-        <span style={iconBox}>🔍</span>
+        <span style={iconBox}>
+          <Search size={18} color="#1a6b3c" />
+        </span>
         <input
           data-testid="hero-search-input"
           value={q}
@@ -141,7 +144,9 @@ export default function HeroSearch() {
 
       {/* CATEGORY */}
       <div style={{ position: "relative" }} ref={catRef}>
-        <span style={iconBox}>🏷️</span>
+        <span style={iconBox}>
+          <Tag size={18} color="#1a6b3c" />
+        </span>
         <input
           data-testid="hero-category-input"
           value={category}
@@ -167,7 +172,7 @@ export default function HeroSearch() {
                 style={ddItem}
                 data-testid={`hero-cat-option-${c}`}
               >
-                <span>🏷️</span> {c}
+                <Tag size={16} color="#1a6b3c" /> {c}
               </button>
             ))}
           </div>
@@ -176,7 +181,9 @@ export default function HeroSearch() {
 
       {/* LOCATION */}
       <div style={{ position: "relative" }} ref={locRef}>
-        <span style={iconBox}>📍</span>
+        <span style={iconBox}>
+          <MapPin size={18} color="#1a6b3c" />
+        </span>
         <input
           data-testid="hero-location-input"
           value={locality}
@@ -202,7 +209,7 @@ export default function HeroSearch() {
                 style={ddItem}
                 data-testid={`hero-loc-option-${l}`}
               >
-                <span>📍</span> {l}
+                <MapPin size={16} color="#1a6b3c" /> {l}
               </button>
             ))}
           </div>
@@ -229,7 +236,10 @@ export default function HeroSearch() {
           whiteSpace: "nowrap",
         }}
       >
-        🔍 Search
+        <>
+          <Search size={16} />
+          Search
+        </>
       </button>
 
       <style jsx>{`
@@ -261,7 +271,9 @@ const iconBox: React.CSSProperties = {
   left: "14px",
   top: "50%",
   transform: "translateY(-50%)",
-  fontSize: "16px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   pointerEvents: "none",
   zIndex: 2,
 };

@@ -315,10 +315,26 @@ export default function PropertiesPage() {
       ${area}
     `;
 
-      if (q && !haystack.includes(q)) return false;
-      if (selectedCats.length > 0 && !selectedCats.includes(category))
+      // ✅ SEARCH FROM MAIN SEARCH BOX
+      if (q && !searchText.includes(q)) {
         return false;
-      if (loc && !locality.includes(loc) && !city.includes(loc)) return false;
+      }
+
+      // ✅ CATEGORY FILTER
+      if (selectedCats.length > 0 && !selectedCats.includes(category)) {
+        return false;
+      }
+
+      // ✅ LOCATION FILTER
+      if (
+        loc &&
+        !locality.includes(loc) &&
+        !city.includes(loc) &&
+        !area.includes(loc)
+      ) {
+        return false;
+      }
+
       return true;
     });
 
@@ -1532,7 +1548,7 @@ export default function PropertiesPage() {
           .favBtn {
             position: absolute;
             top: 12px;
-            left: 800px;
+            left: 850px;
             z-index: 50;
             width: 42px;
             height: 42px;

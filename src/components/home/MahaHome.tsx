@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
 import properties from "@/moc-data/properties.json";
+import HeroSearch from "@/components/home/HeroSearch";
 import {
   Phone,
   Mail,
@@ -875,13 +876,10 @@ function Nav() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   HERO  — 450px max, real images, prev/next arrows
+   HERO  — slider + integrated HeroSearch (redirects to /properties)
 ═══════════════════════════════════════════════════════════ */
 function Hero() {
   const [slide, setSlide] = useState(0);
-  const [sq, setSq] = useState("");
-  const [type, setType] = useState("");
-  const [loc, setLoc] = useState("");
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const go = useCallback((i: number) => {
@@ -908,12 +906,12 @@ function Hero() {
     <section
       style={{
         position: "relative",
-        height: "min(450px,90svh)",
-        minHeight: "320px",
+        height: "min(560px,95svh)",
+        minHeight: "440px",
         overflow: "hidden",
       }}
     >
-      {/* Slides — ALL pre-mounted, opacity cross-fade only (no layout/size change = no jerk) */}
+      {/* Slides — opacity cross-fade */}
       {SLIDES.map((sl, i) => (
         <div
           key={i}
@@ -934,21 +932,21 @@ function Hero() {
               priority={i === 0}
             />
           </div>
-          {/* Two-stop gradient: light top for logo visibility, heavy bottom for text */}
           <div
             style={{
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(to bottom, rgba(0,0,0,.38) 0%, rgba(0,0,0,.08) 38%, rgba(0,0,0,.60) 72%, rgba(0,0,0,.84) 100%)",
+                "linear-gradient(to bottom, rgba(0,0,0,.45) 0%, rgba(0,0,0,.15) 35%, rgba(0,0,0,.65) 75%, rgba(0,0,0,.88) 100%)",
             }}
           />
         </div>
       ))}
 
-      {/* ← → arrows — transparent circles */}
+      {/* ← → arrows */}
       <button
         onClick={() => go((slide - 1 + SLIDES.length) % SLIDES.length)}
+        aria-label="Previous slide"
         style={{
           position: "absolute",
           top: "50%",
@@ -965,19 +963,13 @@ function Hero() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transition: `background .18s ${E}`,
         }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.background = "rgba(255,255,255,.24)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.background = "rgba(255,255,255,.13)")
-        }
       >
         {I.arL}
       </button>
       <button
         onClick={() => go((slide + 1) % SLIDES.length)}
+        aria-label="Next slide"
         style={{
           position: "absolute",
           top: "50%",
@@ -994,19 +986,12 @@ function Hero() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transition: `background .18s ${E}`,
         }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.background = "rgba(255,255,255,.24)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.background = "rgba(255,255,255,.13)")
-        }
       >
         {I.arR}
       </button>
 
-      {/* Content */}
+      {/* Content overlay */}
       <div
         style={{
           position: "absolute",
@@ -1014,15 +999,16 @@ function Hero() {
           zIndex: 2,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: "0 0 28px",
+          justifyContent: "center",
+          padding: "0 0 40px",
         }}
       >
         <div className="w">
+          {/* Tag */}
           <div
             key={`tag-${slide}`}
             className="fu"
-            style={{ marginBottom: "9px" }}
+            style={{ marginBottom: "12px" }}
           >
             <span
               style={{
@@ -1034,8 +1020,8 @@ function Hero() {
                 border: "1px solid rgba(134,239,172,.24)",
                 backdropFilter: "blur(8px)",
                 borderRadius: "99px",
-                padding: "4px 12px",
-                fontSize: "10.5px",
+                padding: "5px 13px",
+                fontSize: "11px",
                 fontWeight: 700,
                 letterSpacing: ".04em",
                 textTransform: "uppercase",
@@ -1054,220 +1040,75 @@ function Hero() {
               {S.tag}
             </span>
           </div>
+
+          {/* Heading */}
           <h1
             key={`h-${slide}`}
             className="fu d1"
             style={{
               fontFamily: FONT,
-              fontSize: "clamp(1.5rem,4vw,2.75rem)",
+              fontSize: "clamp(1.75rem,4.2vw,3rem)",
               fontWeight: 900,
               color: "white",
               lineHeight: 1.08,
               letterSpacing: "-0.03em",
-              marginBottom: "8px",
+              marginBottom: "12px",
               whiteSpace: "pre-line",
-              maxWidth: "640px",
-              textShadow: "0 2px 20px rgba(0,0,0,.3)",
+              maxWidth: "680px",
+              textShadow: "0 2px 20px rgba(0,0,0,.35)",
             }}
           >
             {S.h}
           </h1>
+
+          {/* Subtitle */}
           <p
             key={`s-${slide}`}
             className="fu d2"
             style={{
-              fontSize: "clamp(.85rem,1.7vw,.975rem)",
-              color: "rgba(255,255,255,.7)",
-              marginBottom: "18px",
+              color: "rgba(255,255,255,.85)",
+              fontSize: "clamp(.95rem,1.6vw,1.05rem)",
               lineHeight: 1.6,
-              maxWidth: "520px",
+              maxWidth: "580px",
+              marginBottom: "26px",
+              textShadow: "0 1px 10px rgba(0,0,0,.3)",
             }}
           >
             {S.sub}
           </p>
 
-          {/* Search bar */}
-          <div
-            // key={`sb-${slide}`}
-            className="fu d3"
-            style={{
-              background: "rgba(255,255,255,.97)",
-              backdropFilter: "blur(24px)",
-              borderRadius: "13px",
-              padding: "7px",
-              maxWidth: "720px",
-              boxShadow:
-                "0 18px 56px rgba(0,0,0,.26), 0 0 0 1px rgba(255,255,255,.1)",
-              display: "grid",
-              gridTemplateColumns: "1fr auto auto auto",
-              gap: 0,
-              alignItems: "center",
-            }}
-          >
-            <div
-              style={{ padding: "6px 13px", borderRight: `1px solid ${G.li}` }}
-            >
-              <div
-                style={{
-                  fontSize: "9px",
-                  fontWeight: 800,
-                  color: G.mu,
-                  textTransform: "uppercase",
-                  letterSpacing: ".07em",
-                  marginBottom: "3px",
-                }}
-              >
-                Search
-              </div>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
-              >
-                <span style={{ color: G.g, flexShrink: 0 }}>{I.srch}</span>
-                <input
-                  value={sq}
-                  onChange={(e) => setSq(e.target.value)}
-                  placeholder="Locality, project, keyword…"
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    color: G.ink,
-                    background: "transparent",
-                    width: "100%",
-                    fontFamily: FONT,
-                  }}
-                />
-              </div>
-            </div>
-            <div
-              style={{
-                padding: "6px 13px",
-                borderRight: `1px solid ${G.li}`,
-                minWidth: "148px",
-              }}
-              className="mdhide"
-            >
-              <div
-                style={{
-                  fontSize: "9px",
-                  fontWeight: 800,
-                  color: G.mu,
-                  textTransform: "uppercase",
-                  letterSpacing: ".07em",
-                  marginBottom: "3px",
-                }}
-              >
-                Type
-              </div>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                style={{
-                  border: "none",
-                  outline: "none",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: G.ink,
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontFamily: FONT,
-                  width: "100%",
-                }}
-              >
-                {TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div
-              style={{
-                padding: "6px 13px",
-                borderRight: `1px solid ${G.li}`,
-                minWidth: "148px",
-              }}
-              className="mdhide"
-            >
-              <div
-                style={{
-                  fontSize: "9px",
-                  fontWeight: 800,
-                  color: G.mu,
-                  textTransform: "uppercase",
-                  letterSpacing: ".07em",
-                  marginBottom: "3px",
-                }}
-              >
-                Locality
-              </div>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "5px" }}
-              >
-                <span style={{ color: G.g, flexShrink: 0 }}>{I.pin}</span>
-                <select
-                  value={loc}
-                  onChange={(e) => setLoc(e.target.value)}
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: G.ink,
-                    background: "transparent",
-                    cursor: "pointer",
-                    fontFamily: FONT,
-                    flex: 1,
-                  }}
-                >
-                  {LOCS_D.map((l) => (
-                    <option key={l}>{l}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div style={{ padding: "5px" }}>
-              <Link
-                href="/properties"
-                className="b bg"
-                style={{
-                  padding: "0 20px",
-                  height: "42px",
-                  borderRadius: "9px",
-                  fontSize: "13.5px",
-                  gap: "6px",
-                }}
-              >
-                {I.srch} Search
-              </Link>
-            </div>
+          {/* ✅ NEW SEARCH BAR — redirects to /properties with filters */}
+          <div className="fu d3" style={{ maxWidth: "880px" }}>
+            <HeroSearch />
           </div>
         </div>
       </div>
 
-      {/* Dots */}
+      {/* Slide dots */}
       <div
         style={{
           position: "absolute",
-          bottom: "13px",
-          right: "28px",
-          zIndex: 3,
+          bottom: "16px",
+          left: "50%",
+          transform: "translateX(-50%)",
           display: "flex",
           gap: "6px",
-          alignItems: "center",
+          zIndex: 3,
         }}
       >
         {SLIDES.map((_, i) => (
           <button
             key={i}
             onClick={() => go(i)}
+            aria-label={`Go to slide ${i + 1}`}
             style={{
-              width: i === slide ? "22px" : "7px",
-              height: "7px",
+              width: i === slide ? "26px" : "8px",
+              height: "8px",
               borderRadius: "99px",
               border: "none",
               cursor: "pointer",
-              background: i === slide ? "white" : "rgba(255,255,255,.35)",
-              transition: `all .3s ${E}`,
+              background: i === slide ? "white" : "rgba(255,255,255,.45)",
+              transition: `all .28s ${E}`,
             }}
           />
         ))}
@@ -3206,283 +3047,7 @@ function CTA() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FOOTER  — single, best UI
-═══════════════════════════════════════════════════════════ */
-// export const FCOLS = [
-//   {
-//     t: "NA Plots",
-//     ll: [
-//       ["NA Plots On Gangapur Road", "#"],
-//       ["NA Plots On Nashik Road", "#"],
-//       ["NA Plots In Meri", "#"],
-//       ["NA Plots In Igatpuri", "#"],
-//       ["NA Plots On Trimbak Road", "#"],
-//       ["Collector NA Plot", "#"],
-//     ],
-//   },
-//   {
-//     t: "Agriculture",
-//     ll: [
-//       ["Agriculture Land In Nashik", "#"],
-//       ["Farm Land In Igatpuri", "#"],
-//       ["Farmhouse Plots In Nashik", "#"],
-//       ["Grape Farm Land", "#"],
-//       ["Warehouse Land", "#"],
-//       ["Industrial Sheds MIDC", "#"],
-//     ],
-//   },
-//   {
-//     t: "Commercial",
-//     ll: [
-//       ["Commercial Plots In Nashik", "#"],
-//       ["Plots In Satpur MIDC", "#"],
-//       ["Industrial Plots In Ambad", "#"],
-//       ["Showroom / Office Space", "#"],
-//       ["Investment Plots In Nashik", "#"],
-//       ["Collector NA Plots InNashik", "#"],
-//     ],
-//   },
-//   {
-//     t: "Company",
-//     ll: [
-//       ["About Us", "#"],
-//       ["Post Property", "#"],
-//       ["Blogs", "#"],
-//       ["Contact Us", "#"],
-//       ["Privacy Policy", "#"],
-//       ["Terms of Use", "#"],
-//     ],
-//   },
-// ];
 
-// function Foot() {
-//   const lk: React.CSSProperties = {
-//     fontSize: "12.5px",
-//     color: "white",
-//     transition: `color .14s ${E}`,
-//   };
-//   return (
-//     <footer style={{ background: "#070b0e", color: "white" }}>
-//       <div className="w" style={{ paddingTop: "52px", paddingBottom: "36px" }}>
-//         <div
-//           style={{
-//             display: "grid",
-//             gridTemplateColumns: "1.25fr repeat(4,1fr)",
-//             gap: "36px",
-//             marginBottom: "36px",
-//           }}
-//         >
-//           <div>
-//             <div
-//               style={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 gap: "8px",
-//                 marginBottom: "18px",
-//               }}
-//             >
-//               <Image
-//                 src="/maha.png"
-//                 alt="Maha Properties Logo"
-//                 width={150}
-//                 height={50}
-//                 style={{
-//                   objectFit: "contain",
-//                 }}
-//               />
-//             </div>
-//             <p
-//               style={{
-//                 fontSize: "12.5px",
-//                 lineHeight: 1.72,
-//                 marginBottom: "16px",
-//                 maxWidth: "210px",
-//               }}
-//             >
-//               Nashik&apos;s most comprehensive property portal — NA plots,
-//               agriculture, commercial & industrial since 2018.
-//             </p>
-//             <div
-//               style={{ display: "flex", flexDirection: "column", gap: "7px" }}
-//             >
-//               <a
-//                 href="tel:+919876543210"
-//                 style={{
-//                   ...lk,
-//                   display: "flex",
-//                   alignItems: "center",
-//                   gap: "6px",
-//                   color: "white",
-//                 }}
-//                 onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
-//                 onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
-//               >
-//                 <span style={{ color: "#2d9455" }}>{I.ph}</span>+91 98765 43210
-//               </a>
-//               <a
-//                 href="mailto:hello@mahaproperties.in"
-//                 style={{
-//                   ...lk,
-//                   display: "flex",
-//                   alignItems: "center", // ✅ center align
-//                   gap: "6px",
-//                   color: "white",
-//                 }}
-//                 onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
-//                 onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
-//               >
-//                 <span
-//                   style={{
-//                     color: "#2d9455",
-//                     flexShrink: 0,
-//                     marginTop: "1px",
-//                   }}
-//                 >
-//                   {I.mail}
-//                 </span>
-
-//                 <span
-//                   style={{
-//                     fontSize: "12.5px",
-//                     lineHeight: "1.4",
-//                     wordBreak: "break-word",
-//                   }}
-//                 >
-//                   hello@mahaproperties.in
-//                 </span>
-//               </a>
-//               <div
-//                 style={{
-//                   display: "flex",
-//                   alignItems: "flex-start",
-//                   gap: "8px",
-//                 }}
-//               >
-//                 <MapPin
-//                   size={14}
-//                   color="#4ade82"
-//                   style={{
-//                     marginTop: "2px",
-//                     flexShrink: 0,
-//                   }}
-//                 />
-
-//                 <span
-//                   style={{
-//                     fontSize: "12.5px",
-//                     color: "#ffffff",
-//                     lineHeight: "1.4",
-//                   }}
-//                 >
-//                   Nashik, Maharashtra 422001
-//                 </span>
-//               </div>
-//             </div>
-//             <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
-//               {[Instagram, Facebook, Youtube, Twitter].map((Icon, i) => (
-//                 <a
-//                   key={i}
-//                   href="#"
-//                   style={{
-//                     width: "36px",
-//                     height: "36px",
-//                     borderRadius: "10px",
-//                     background: "rgba(255,255,255,0.05)",
-//                     border: "1px solid rgba(255,255,255,0.08)",
-//                     display: "flex",
-//                     alignItems: "center",
-//                     justifyContent: "center",
-//                     color: "#9ca3af",
-//                     transition: "all 0.2s",
-//                   }}
-//                   onMouseEnter={(e) => {
-//                     (e.currentTarget as HTMLElement).style.background =
-//                       "rgba(22,163,74,0.2)";
-//                     (e.currentTarget as HTMLElement).style.color = "#4ade82";
-//                     (e.currentTarget as HTMLElement).style.borderColor =
-//                       "rgba(74,222,128,0.3)";
-//                   }}
-//                   onMouseLeave={(e) => {
-//                     (e.currentTarget as HTMLElement).style.background =
-//                       "rgba(255,255,255,0.05)";
-//                     (e.currentTarget as HTMLElement).style.color = "#9ca3af";
-//                     (e.currentTarget as HTMLElement).style.borderColor =
-//                       "rgba(255,255,255,0.08)";
-//                   }}
-//                 >
-//                   <Icon size={15} />
-//                 </a>
-//               ))}
-//             </div>
-//           </div>
-//           {FCOLS.map((col) => (
-//             <div key={col.t}>
-//               <h5
-//                 style={{
-//                   fontSize: "11px",
-//                   fontWeight: 700,
-//                   color: "rgba(255,255,255,.48)",
-//                   letterSpacing: ".08em",
-//                   textTransform: "uppercase",
-//                   marginBottom: "14px",
-//                 }}
-//               >
-//                 {col.t}
-//               </h5>
-//               <ul
-//                 style={{
-//                   listStyle: "none",
-//                   display: "flex",
-//                   flexDirection: "column",
-//                   gap: "9px",
-//                 }}
-//               >
-//                 {col.ll.map(([l, h]) => (
-//                   <li key={l}>
-//                     <a
-//                       href={h}
-//                       style={lk}
-//                       onMouseEnter={(e) =>
-//                         (e.currentTarget.style.color = "#e8ffda")
-//                       }
-//                       onMouseLeave={(e) =>
-//                         (e.currentTarget.style.color = "white")
-//                       }
-//                     >
-//                       {l}
-//                     </a>
-//                   </li>
-//                 ))}
-//               </ul>
-//             </div>
-//           ))}
-//         </div>
-//         <div
-//           style={{
-//             height: "1px",
-//             background: "rgba(255,255,255,.055)",
-//             marginBottom: "18px",
-//           }}
-//         />
-//         <div
-//           style={{ display: "flex", alignItems: "center", fontSize: "12px" }}
-//         >
-//           <span style={{ whiteSpace: "nowrap" }}>
-//             {" "}
-//             © 2026 MahaProperties. All rights reserved. Made with ❤️ in Nashik.
-//           </span>
-//           <span style={{ marginLeft: "570px", whiteSpace: "nowrap" }}>
-//             Developed by G.K. Digital
-//           </span>
-//         </div>
-//         {/* <div style={{ marginTop:"16px", textAlign:"center" }}>
-//           <span style={{ fontSize:"1.2rem", fontWeight:800, color:"#0a0f14", letterSpacing:"0.03em" }}>Mahaproperties</span>
-//         </div> */}
-//       </div>
-//     </footer>
-//   );
-// }
 
 /* ═══════════════════════════════════════════════════════════
    WHATSAPP STICKY  — official green, real WA logo, bouncing

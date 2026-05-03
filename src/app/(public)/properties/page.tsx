@@ -300,11 +300,20 @@ export default function PropertiesPage() {
     const loc = norm(debouncedFilters.locality);
 
     let list = allProperties.filter((p) => {
-      const title = norm(p.title || p.t);
-      const category = norm(p.category || p.cat);
-      const locality = norm(p.locality || p.loc);
-      const city = norm(p.city);
-      const haystack = `${title} ${category} ${locality} ${city}`;
+      const title = norm(p.title || p.t || "");
+      const category = norm(p.category || p.cat || "");
+      const locality = norm(p.locality || p.loc || "");
+      const city = norm(p.city || "");
+      const area = norm(p.area || "");
+
+      // ✅ one searchable string
+      const searchText = `
+      ${title}
+      ${category}
+      ${locality}
+      ${city}
+      ${area}
+    `;
 
       if (q && !haystack.includes(q)) return false;
       if (selectedCats.length > 0 && !selectedCats.includes(category))
@@ -319,23 +328,29 @@ export default function PropertiesPage() {
           (a, b) => parsePrice(a.price ?? a.pr) - parsePrice(b.price ?? b.pr),
         );
         break;
+
       case "price_desc":
         list = [...list].sort(
           (a, b) => parsePrice(b.price ?? b.pr) - parsePrice(a.price ?? a.pr),
         );
         break;
+
       case "popular":
         list = [...list].sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
         break;
+
       case "newest":
       default:
         list = [...list].sort((a, b) => {
           const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+
           const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
           return db - da;
         });
         break;
     }
+
     return list;
   }, [allProperties, debouncedFilters]);
 

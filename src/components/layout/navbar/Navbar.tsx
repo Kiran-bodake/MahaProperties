@@ -1122,6 +1122,7 @@ export function Navbar() {
                   marginLeft: "auto",
                 }}
               >
+
                 {/* Search icon button */}
                 <button
                   style={{
@@ -1141,6 +1142,16 @@ export function Navbar() {
                 >
                   <Search size={16} />
                 </button>
+
+                 {/* ✅ ADD HERE — Auth Buttons */}
+  <div style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  }}>
+    <Link href="/login">Login</Link>
+    
+  </div>
 
                 {/* Phone */}
                 {/* <a

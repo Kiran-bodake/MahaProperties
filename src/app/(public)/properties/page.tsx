@@ -6,6 +6,7 @@ import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
+
 import { Navbar as MegaNavbar } from "@/components/layout/navbar/Navbar";
 import PropertyImageSlider from "@/components/property/PropertyImageSlider";
 import ContactPopup from "@/components/property/ContactPopup";
@@ -287,49 +288,94 @@ export default function PropertiesPage() {
     return uniqueCategories.filter((c) => norm(c).includes(q)).slice(0, 8);
   }, [catInput, uniqueCategories]);
 
-  const properties = useMemo(() => {
-    const q = norm(debouncedFilters.q);
-    const selectedCats = debouncedFilters.category.map((c) => norm(c));
-    const loc = norm(debouncedFilters.locality);
+const properties = useMemo(() => {
+  const q = norm(debouncedFilters.q);
+  const selectedCats = debouncedFilters.category.map((c) => norm(c));
+  const loc = norm(debouncedFilters.locality);
 
-    let list = allProperties.filter((p) => {
-      const title = norm(p.title || p.t);
-      const category = norm(p.category || p.cat);
-      const locality = norm(p.locality || p.loc);
-      const city = norm(p.city);
-      const haystack = `${title} ${category} ${locality} ${city}`;
+  let list = allProperties.filter((p) => {
+    const title = norm(p.title || p.t || "");
+    const category = norm(p.category || p.cat || "");
+    const locality = norm(p.locality || p.loc || "");
+    const city = norm(p.city || "");
+    const area = norm(p.area || "");
 
-      if (q && !haystack.includes(q)) return false;
-      if (selectedCats.length > 0 && !selectedCats.includes(category)) return false;
-      if (loc && !locality.includes(loc) && !city.includes(loc)) return false;
-      return true;
-    });
+    // ✅ one searchable string
+    const searchText = `
+      ${title}
+      ${category}
+      ${locality}
+      ${city}
+      ${area}
+    `;
 
-    switch (debouncedFilters.sortBy) {
-      case "price_asc":
-        list = [...list].sort(
-          (a, b) => parsePrice(a.price ?? a.pr) - parsePrice(b.price ?? b.pr),
-        );
-        break;
-      case "price_desc":
-        list = [...list].sort(
-          (a, b) => parsePrice(b.price ?? b.pr) - parsePrice(a.price ?? a.pr),
-        );
-        break;
-      case "popular":
-        list = [...list].sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
-        break;
-      case "newest":
-      default:
-        list = [...list].sort((a, b) => {
-          const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return db - da;
-        });
-        break;
+    // ✅ SEARCH FROM MAIN SEARCH BOX
+    if (q && !searchText.includes(q)) {
+      return false;
     }
-    return list;
-  }, [allProperties, debouncedFilters]);
+
+    // ✅ CATEGORY FILTER
+    if (
+      selectedCats.length > 0 &&
+      !selectedCats.includes(category)
+    ) {
+      return false;
+    }
+
+    // ✅ LOCATION FILTER
+    if (
+      loc &&
+      !locality.includes(loc) &&
+      !city.includes(loc) &&
+      !area.includes(loc)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  switch (debouncedFilters.sortBy) {
+    case "price_asc":
+      list = [...list].sort(
+        (a, b) =>
+          parsePrice(a.price ?? a.pr) -
+          parsePrice(b.price ?? b.pr)
+      );
+      break;
+
+    case "price_desc":
+      list = [...list].sort(
+        (a, b) =>
+          parsePrice(b.price ?? b.pr) -
+          parsePrice(a.price ?? a.pr)
+      );
+      break;
+
+    case "popular":
+      list = [...list].sort(
+        (a, b) => (b.views ?? 0) - (a.views ?? 0)
+      );
+      break;
+
+    case "newest":
+    default:
+      list = [...list].sort((a, b) => {
+        const da = a.createdAt
+          ? new Date(a.createdAt).getTime()
+          : 0;
+
+        const db = b.createdAt
+          ? new Date(b.createdAt).getTime()
+          : 0;
+
+        return db - da;
+      });
+      break;
+  }
+
+  return list;
+}, [allProperties, debouncedFilters]);
 
   const setF = useCallback(<K extends keyof Filters>(k: K, v: Filters[K]) => {
     setFilters((prev) => ({ ...prev, [k]: v }));

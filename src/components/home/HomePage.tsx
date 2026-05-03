@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 /* ─────────────────────────────────────────────────────────────
    DESIGN SYSTEM
@@ -829,176 +830,347 @@ const HERO_SLIDES = [
 const SEARCH_TYPES = ["NA Plot","Collector NA","Agriculture","Warehouse","Commercial","Investment Plot","Farmhouse","Industrial Shed"];
 const LOCALITIES_LIST = ["Any Locality","Gangapur Road","Nashik Road","Meri","Igatpuri","Ambad","Pathardi Phata","Trimbak Road","Indira Nagar","Sinnar","Panchavati","College Road","Varavandi","Dindori Road","Ozar","Satpur"];
 
-function Hero() {
-  const [slide, setSlide]   = useState(0);
-  const [loaded,setLoaded]  = useState<boolean[]>([false,false,false]);
-  const [srchQ, setSrchQ]   = useState("");
-  const [type,  setType]    = useState("");
-  const [loc,   setLoc]     = useState("");
-  const intervalRef = useRef<ReturnType<typeof setInterval>|null>(null);
 
-  const startTimer = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => setSlide(s => (s + 1) % HERO_SLIDES.length), 6000);
+
+/* ─────────────────────────────────────────────────────────────
+   HERO SECTION — with live JSON API search
+   (Filter logic mirrors /properties page: multi-field search
+    across title + category + locality + city + area.)
+   ───────────────────────────────────────────────────────────── */
+type ApiProp = {
+  id?: string;
+  _id?: string;
+  slug?: string;
+  title?: string;
+  t?: string;
+  category?: string;
+  cat?: string;
+  locality?: string;
+  loc?: string;
+  city?: string;
+  area?: string;
+};
+
+/* Same normalizer used on /properties page */
+function norm(s: unknown): string {
+  return String(s ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function Hero() {
+  const router = useRouter();
+
+  const [slide, setSlide] = useState(0);
+  const [loaded, setLoaded] = useState([false, false, false]);
+  const [srchQ, setSrchQ] = useState("");
+  const [type, setType] = useState("");
+  const [loc, setLoc] = useState("");
+
+  // ✅ API state
+  const [allProps, setAllProps] = useState<ApiProp[]>([]);
+  const [suggestions, setSuggestions] = useState<ApiProp[]>([]);
+  const [showSuggest, setShowSuggest] = useState(false);
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /* ── Fetch all properties once from your JSON API ── */
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("/api/properties", { cache: "no-store", signal: ctrl.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ApiProp[] = Array.isArray(data) ? data : data.properties || [];
+        setAllProps(list);
+      })
+      .catch(() => setAllProps([]));
+    return () => ctrl.abort();
   }, []);
 
-  useEffect(() => { startTimer(); return () => { if (intervalRef.current) clearInterval(intervalRef.current); }; }, [startTimer]);
+  /* ── Distinct categories & localities from API data ── */
+  const apiCategories = Array.from(
+    new Set(allProps.map((p) => (p.category || p.cat || "").trim()).filter(Boolean))
+  ).sort();
 
-  const goTo = (i: number) => { setSlide(i); startTimer(); };
+  const apiLocalities = Array.from(
+    new Set(
+      allProps
+        .map((p) => (p.locality || p.loc || "").trim())
+        .filter(Boolean)
+    )
+  ).sort();
+
+  /* ── Live suggestions — same logic as /properties page ── */
+  useEffect(() => {
+    const q = norm(srchQ);
+    if (!q) {
+      setSuggestions([]);
+      return;
+    }
+    const matches = allProps
+      .filter((p) => {
+        const title    = norm(p.title || p.t || "");
+        const category = norm(p.category || p.cat || "");
+        const locality = norm(p.locality || p.loc || "");
+        const city     = norm(p.city || "");
+        const area     = norm(p.area || "");
+
+        // ✅ one searchable string (identical to properties page)
+        const searchText = `${title} ${category} ${locality} ${city} ${area}`;
+        return searchText.includes(q);
+      })
+      .slice(0, 6);
+    setSuggestions(matches);
+  }, [srchQ, allProps]);
+
+  /* ── Slider timer ── */
+  const startTimer = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(
+      () => setSlide((s) => (s + 1) % HERO_SLIDES.length),
+      6000
+    );
+  }, []);
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [startTimer]);
+
+  const goTo = (i: number) => {
+    setSlide(i);
+    startTimer();
+  };
+
+  /* ── Search handler — redirect to /properties with the same
+        param names the properties page already reads
+        (q, category, locality) ── */
+  const handleSearch = () => {
+    const qs = new URLSearchParams();
+    if (srchQ.trim())                  qs.set("q", srchQ.trim());
+    if (type)                          qs.append("category", type);
+    if (loc && loc !== "Any Locality") qs.set("locality", loc);
+    router.push(`/properties${qs.toString() ? `?${qs.toString()}` : ""}`);
+  };
+
+  const handleSuggestionClick = (p: ApiProp) => {
+    if (p.slug) {
+      router.push(`/properties/${p.slug}`);
+    } else {
+      setSrchQ(p.title || p.t || "");
+      setShowSuggest(false);
+    }
+  };
 
   const S = HERO_SLIDES[slide];
 
   return (
-    <section style={{ position: "relative", height: "100vh", minHeight: "640px", maxHeight: "900px", overflow: "hidden" }}>
-
-      {/* ── Background images (all pre-rendered, opacity transitions) ── */}
+    <section style={{ position: "relative", width: "100%", height: "100vh", minHeight: "680px", overflow: "hidden", color: "white" }}>
+      {/* ── Background slides ── */}
       {HERO_SLIDES.map((sl, i) => (
-        <div key={i} style={{
-          position: "absolute", inset: 0,
-          opacity: i === slide ? 1 : 0,
-          transition: "opacity 1.2s cubic-bezier(0.4,0,0.2,1)",
-          zIndex: 0,
-        }}>
+        <div key={i} style={{ position: "absolute", inset: 0, opacity: i === slide ? 1 : 0, transition: `opacity 1s ${ease}` }}>
           <img
             src={sl.img}
             alt=""
-            onLoad={() => setLoaded(prev => { const n = [...prev]; n[i] = true; return n; })}
+            onLoad={() => setLoaded((prev) => { const n = [...prev]; n[i] = true; return n; })}
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
           />
-          {/* Gradient overlay — bottom-heavy */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(14,17,23,0.35) 0%, rgba(14,17,23,0.15) 40%, rgba(14,17,23,0.65) 75%, rgba(14,17,23,0.88) 100%)" }} />
-          {/* Subtle vignette */}
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,17,23,0.35) 0%, rgba(14,17,23,0.75) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 200px rgba(0,0,0,0.5)" }} />
         </div>
       ))}
 
       {/* ── Content ── */}
-      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: "72px" }}>
-        <div className="wrap">
+      <div className="wrap" style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", paddingTop: "80px", paddingBottom: "40px" }}>
+        <div style={{ maxWidth: "780px" }}>
+          <span className="tag wu-fadeup d1" style={{ background: "rgba(255,255,255,0.15)", color: "white", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)" }}>
+            {S.tag}
+          </span>
 
-          {/* Tag */}
-          <div key={`tag-${slide}`} className="wu-fadeup" style={{ marginBottom: "18px" }}>
-            <span className="tag" style={{ background: "rgba(26,107,60,0.75)", color: "#86efac", border: "1px solid rgba(134,239,172,0.25)", backdropFilter: "blur(8px)" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ade80", display: "inline-block", animation: "pulse 2s infinite" }} />
-              {S.tag}
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 key={`h1-${slide}`} className="wu-fadeup d1" style={{
-            fontFamily: T.font,
-            fontSize: "clamp(2.2rem, 5.5vw, 4rem)",
-            fontWeight: 800,
-            color: "white",
-            lineHeight: 1.08,
-            letterSpacing: "-0.035em",
-            marginBottom: "20px",
-            maxWidth: "720px",
-            whiteSpace: "pre-line",
-          }}>
+          <h1 className="wu-fadeup d2" style={{ fontSize: "clamp(2.2rem, 5vw, 4.2rem)", fontWeight: 800, lineHeight: 1.05, margin: "18px 0", whiteSpace: "pre-line" }}>
             {S.h1}
           </h1>
 
-          {/* Sub */}
-          <p key={`sub-${slide}`} className="wu-fadeup d2" style={{
-            fontSize: "clamp(1rem, 2vw, 1.15rem)",
-            color: "rgba(255,255,255,0.72)",
-            fontWeight: 400,
-            maxWidth: "500px",
-            marginBottom: "36px",
-            lineHeight: 1.65,
-          }}>
+          <p className="wu-fadeup d3" style={{ fontSize: "clamp(1rem, 1.4vw, 1.15rem)", color: "rgba(255,255,255,0.85)", maxWidth: "560px", lineHeight: 1.6 }}>
             {S.sub}
           </p>
 
           {/* ── Search Box ── */}
-          <div key={`search-${slide}`} className="wu-fadeup d3" style={{
-            background: "rgba(255,255,255,0.97)",
-            backdropFilter: "blur(20px)",
-            borderRadius: "18px",
-            padding: "10px",
-            maxWidth: "780px",
-            marginBottom: "28px",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.12)",
-            display: "grid",
-            gridTemplateColumns: "1fr auto auto auto",
-            gap: "0",
-            alignItems: "center",
-          }}>
-            {/* Keyword */}
-            <div style={{ padding: "8px 16px", borderRight: `1px solid ${T.line}` }}>
-              <div style={{ fontSize: "10px", fontWeight: 800, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Search</div>
+          <div
+            className="wu-fadeup d4"
+            style={{
+              marginTop: "32px",
+              background: "white",
+              borderRadius: T.r20,
+              padding: "10px",
+              display: "grid",
+              gridTemplateColumns: "1.6fr 1fr 1fr auto",
+              gap: "8px",
+              alignItems: "center",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+              maxWidth: "860px",
+              position: "relative",
+            }}
+          >
+            {/* Keyword + autocomplete */}
+            <div style={{ padding: "4px 12px", position: "relative" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>
+                Search
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: T.green, flexShrink: 0 }}>{IC.search}</span>
+                <span style={{ color: T.green }}>{IC.search}</span>
                 <input
                   value={srchQ}
-                  onChange={e => setSrchQ(e.target.value)}
-                  placeholder="Locality, project, keyword…"
+                  onChange={(e) => {
+                    setSrchQ(e.target.value);
+                    setShowSuggest(true);
+                  }}
+                  onFocus={() => setShowSuggest(true)}
+                  onBlur={() => setTimeout(() => setShowSuggest(false), 180)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
+                  placeholder="Property name, locality, category…"
                   style={{ border: "none", outline: "none", fontSize: "14px", fontWeight: 500, color: T.ink, background: "transparent", width: "100%", fontFamily: T.font }}
                 />
               </div>
+
+              {/* Suggestions dropdown */}
+              {showSuggest && suggestions.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    marginTop: "8px",
+                    background: "white",
+                    border: `1px solid ${T.line}`,
+                    borderRadius: "12px",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+                    overflow: "hidden",
+                    zIndex: 50,
+                    maxHeight: "320px",
+                    overflowY: "auto",
+                  }}
+                >
+                  {suggestions.map((p) => (
+                    <button
+                      key={p.id || p._id || p.slug}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handleSuggestionClick(p)}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        padding: "10px 14px",
+                        background: "white",
+                        border: "none",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        borderBottom: `1px solid ${T.bgOff}`,
+                      }}
+                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.greenXL)}
+                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "white")}
+                    >
+                      <span style={{ fontSize: "13.5px", fontWeight: 600, color: T.ink }}>
+                        {p.title || p.t}
+                      </span>
+                      <span style={{ fontSize: "11.5px", color: T.muted, marginTop: "2px" }}>
+                        {(p.category || p.cat) && <>🏷 {p.category || p.cat} · </>}
+                        📍 {p.locality || p.loc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Type */}
-            <div style={{ padding: "8px 16px", borderRight: `1px solid ${T.line}`, minWidth: "170px" }} className="sm-hide">
-              <div style={{ fontSize: "10px", fontWeight: 800, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Type</div>
-              <select value={type} onChange={e => setType(e.target.value)} style={{ border: "none", outline: "none", fontSize: "14px", fontWeight: 600, color: T.ink, background: "transparent", cursor: "pointer", fontFamily: T.font, width: "100%" }}>
+            {/* Type — from API */}
+            <div style={{ padding: "4px 12px", borderLeft: `1px solid ${T.line}` }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>
+                Type
+              </div>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                style={{ border: "none", outline: "none", fontSize: "14px", fontWeight: 600, color: T.ink, background: "transparent", cursor: "pointer", fontFamily: T.font, width: "100%" }}
+              >
                 <option value="">All Types</option>
-                {SEARCH_TYPES.map(t => <option key={t}>{t}</option>)}
+                {apiCategories.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
               </select>
             </div>
 
-            {/* Locality */}
-            <div style={{ padding: "8px 16px", borderRight: `1px solid ${T.line}`, minWidth: "165px" }} className="sm-hide">
-              <div style={{ fontSize: "10px", fontWeight: 800, color: T.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Locality</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ color: T.green, flexShrink: 0 }}>{IC.pin}</span>
-                <select value={loc} onChange={e => setLoc(e.target.value)} style={{ border: "none", outline: "none", fontSize: "14px", fontWeight: 600, color: T.ink, background: "transparent", cursor: "pointer", fontFamily: T.font, flex: 1 }}>
-                  {LOCALITIES_LIST.map(l => <option key={l}>{l}</option>)}
-                </select>
+            {/* Locality — from API */}
+            <div style={{ padding: "4px 12px", borderLeft: `1px solid ${T.line}`, display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>
+                  Locality
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ color: T.green }}>{IC.pin}</span>
+                  <select
+                    value={loc}
+                    onChange={(e) => setLoc(e.target.value)}
+                    style={{ border: "none", outline: "none", fontSize: "14px", fontWeight: 600, color: T.ink, background: "transparent", cursor: "pointer", fontFamily: T.font, flex: 1 }}
+                  >
+                    <option value="">Any Locality</option>
+                    {apiLocalities.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
             {/* Button */}
-            <div style={{ padding: "6px" }}>
-              <button className="btn btn-cta" style={{ padding: "0 28px", height: "52px", borderRadius: "12px", fontSize: "14.5px" }}>
-                {IC.search}&nbsp;Search
-              </button>
-            </div>
+            <button type="button" onClick={handleSearch} className="btn btn-cta" style={{ height: "54px", padding: "0 26px" }}>
+              {IC.search} Search
+            </button>
           </div>
 
           {/* CTAs */}
-          <div key={`cta-${slide}`} className="wu-fadeup d4" style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <Link href="/properties" className="btn btn-primary">{S.cta1}</Link>
-            <Link href="/contact" className="btn btn-ghost">{S.cta2}</Link>
+          <div className="wu-fadeup d5" style={{ display: "flex", gap: "14px", marginTop: "28px", flexWrap: "wrap" }}>
+            <button className="btn btn-primary" onClick={handleSearch}>{S.cta1}</button>
+            <button className="btn btn-ghost">{S.cta2}</button>
           </div>
         </div>
-      </div>
 
-      {/* ── Slide Controls ── */}
-      <div style={{ position: "absolute", bottom: "28px", right: "40px", zIndex: 3, display: "flex", gap: "8px", alignItems: "center" }}>
-        {HERO_SLIDES.map((_, i) => (
-          <button key={i} onClick={() => goTo(i)} style={{
-            width: i === slide ? "28px" : "8px",
-            height: "8px", borderRadius: "99px",
-            background: i === slide ? "white" : "rgba(255,255,255,0.35)",
-            border: "none", cursor: "pointer",
-            transition: `all 0.4s ${ease}`,
-          }} />
-        ))}
-      </div>
+        {/* Slide controls */}
+        <div style={{ position: "absolute", bottom: "40px", left: "50%", transform: "translateX(-50%)", display: "flex", gap: "8px", zIndex: 3 }}>
+          {HERO_SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              style={{
+                width: i === slide ? "28px" : "8px",
+                height: "8px",
+                borderRadius: "99px",
+                background: i === slide ? "white" : "rgba(255,255,255,0.35)",
+                border: "none",
+                cursor: "pointer",
+                transition: `all 0.4s ${ease}`,
+              }}
+            />
+          ))}
+        </div>
 
-      {/* ── Scroll hint ── */}
-      <div style={{ position: "absolute", bottom: "26px", left: "50%", transform: "translateX(-50%)", zIndex: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-        <span style={{ fontSize: "10px", fontWeight: 600, color: "rgba(255,255,255,0.5)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Scroll</span>
-        <div style={{ width: "1px", height: "28px", background: "rgba(255,255,255,0.25)", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: "-100%", left: 0, width: "100%", height: "50%", background: "white", animation: "float 1.6s ease-in-out infinite" }} />
+        <div
+          className="sm-hide"
+          style={{ position: "absolute", bottom: "40px", right: "40px", zIndex: 3, display: "flex", alignItems: "center", gap: "8px", color: "rgba(255,255,255,0.7)", fontSize: "12px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}
+        >
+          Scroll ↓
         </div>
       </div>
     </section>
   );
 }
-
 /* ─────────────────────────────────────────────────────────────
    TICKER — marquee property types
 ───────────────────────────────────────────────────────────── */
